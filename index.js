@@ -9,29 +9,32 @@ const SKILL_NAME = 'MBTA Bus Time';
 const HELP_MESSAGE = 'You can say where is bus number 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'Goodbye and safe trip!';
+const TIME_ZONE = 'America/New_York';
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
-  async handle(handlerInput) {
+  handle(handlerInput) {
     const stopId = 86963;
-    const routeId = 553;
+    const routeIds = [553, 554, 556];
 
-    const currentTime = moment().utc().tz('America/New_York').format('hh:mm A');
+    const currentTime = moment().utc().tz(TIME_ZONE).format('hh:mm A');
     const followUpPrompt = 'What else would you like to know?';
 
-    const predictions = await prediction.getPredictions(routeId, stopId);
-    const speechOutput = `Good morning my bad rabbit! The current time is now ${currentTime}. `
-      + `${predictions} ${followUpPrompt}`;
-    const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
+    return prediction.getPredictions(routeIds, stopId)
+      .then((predictions) => {
+        const speechOutput = `Good morning my bad rabbit! The current time is now ${currentTime}. `
+          + `${predictions} ${followUpPrompt}`;
+        const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
 
-    return handlerInput.responseBuilder
-      .speak(speechOutput)
-      .reprompt(repromptSpeech)
-      .withSimpleCard(SKILL_NAME, speechOutput)
-      .withShouldEndSession(true)
-      .getResponse();
+        return handlerInput.responseBuilder
+          .speak(speechOutput)
+          .reprompt(repromptSpeech)
+          .withSimpleCard(SKILL_NAME, speechOutput)
+          .withShouldEndSession(true)
+          .getResponse();
+      });
   }
 };
 
