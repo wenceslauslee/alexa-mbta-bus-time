@@ -1,26 +1,36 @@
 const Alexa = require('ask-sdk-core');
 const httpRequest = require('request-promise');
+const moment = require('moment-timezone');
+const prediction = require('./prediction');
 const _ = require('underscore');
 
-const APP_ID = "amzn1.ask.skill.dd081fb8-e2fc-498e-bd62-02a4bd761590";
+const APP_ID = 'amzn1.ask.skill.dd081fb8-e2fc-498e-bd62-02a4bd761590';
 const SKILL_NAME = 'MBTA Bus Time';
 const HELP_MESSAGE = 'You can say where is bus number 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'Goodbye and safe trip!';
 
-const PERMISSIONS = ['read::alexa:device:all:address'];
-
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
-  handle(handlerInput) {
-    const speechOutput = "Good morning my bad rabbit!"
-    const repromptSpeech = "I didn't quite get that.  Would you like to get a summary?";
+  async handle(handlerInput) {
+    const stopId = 86963;
+    const routeId = 553;
+
+    const currentTime = moment().utc().tz('America/New_York').format('hh:mm A');
+    const followUpPrompt = 'What else would you like to know?';
+
+    const predictions = await prediction.getPredictions(routeId, stopId);
+    const speechOutput = `Good morning my bad rabbit! The current time is now ${currentTime}. `
+      + `${predictions} ${followUpPrompt}`;
+    const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
 
     return handlerInput.responseBuilder
       .speak(speechOutput)
       .reprompt(repromptSpeech)
+      .withSimpleCard(SKILL_NAME, speechOutput)
+      .withShouldEndSession(true)
       .getResponse();
   }
 };
