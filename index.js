@@ -16,7 +16,7 @@ const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
-  handle(handlerInput) {
+  async handle(handlerInput) {
     const routeIds = [553];
 
     const currentDateTime = moment().utc().tz(TIME_ZONE);
@@ -30,10 +30,12 @@ const LaunchRequestHandler = {
       currentTime: currentTime
     });
 
+    const initialSpeechOutput = `Good morning my bad rabbit! The current time is now ${currentTimeSpeech}. `;
+    await callDirectiveServiceOnStart(handlerInput, initialSpeechOutput);
+
     return prediction.getPredictions(routeIds, STOP_ID, currentDate, currentTime)
       .then((predictions) => {
-        const speechOutput = `Good morning my bad rabbit! The current time is now ${currentTimeSpeech}. `
-          + `${predictions} ${followUpPrompt}`;
+        const speechOutput = `${predictions} ${followUpPrompt}`;
         const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
 
         return handlerInput.responseBuilder
@@ -45,6 +47,24 @@ const LaunchRequestHandler = {
       });
   }
 };
+
+function callDirectiveServiceOnStart(handlerInput, initialSpeechOutput) {
+  const requestEnvelope = handlerInput.requestEnvelope;
+  const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
+  const requestId = requestEnvelope.request.requestId;
+
+  const directive = {
+    header: {
+      requestId,
+    },
+    directive: {
+      type: 'VoicePlayer.Speak',
+      speech: initialSpeechOutput,
+    },
+  };
+
+  return directiveServiceClient.enqueue(directive);
+}
 
 const AskQuestionIntentHandler = {
   canHandle(handlerInput) {
@@ -80,6 +100,7 @@ const HelpIntentHandler = {
     return handlerInput.responseBuilder
       .speak(HELP_MESSAGE)
       .reprompt(HELP_REPROMPT)
+      .withShouldEndSession(false)
       .getResponse();
   }
 };
@@ -116,6 +137,7 @@ const FallbackIntentHandler = {
   handle(handlerInput) {
     return handlerInput.responseBuilder
       .speak('Oops I do not understand. Please try again.')
+      .withShouldEndSession(false)
       .getResponse();
   },
 };
