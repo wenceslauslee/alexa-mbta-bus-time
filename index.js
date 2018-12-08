@@ -9,6 +9,7 @@ const SKILL_NAME = 'MBTA Bus Time';
 const HELP_MESSAGE = 'You can say where is bus number 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'Goodbye and safe trip!';
+const STOP_ID = 86963; //TODO: Hard coded for now.
 const TIME_ZONE = 'America/New_York';
 
 const LaunchRequestHandler = {
@@ -16,15 +17,22 @@ const LaunchRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    const stopId = 86963;
-    const routeIds = [553, 554, 556];
+    const routeIds = [553];
 
-    const currentTime = moment().utc().tz(TIME_ZONE).format('hh:mm A');
+    const currentDateTime = moment().utc().tz(TIME_ZONE);
+    const currentDate = currentDateTime.format('YYYY-MM-DD');
+    const currentTimeSpeech = currentDateTime.format('hh:mm A');
+    const currentTime = currentDateTime.format('HH:mm');
     const followUpPrompt = 'What else would you like to know?';
 
-    return prediction.getPredictions(routeIds, stopId)
+    handlerInput.attributesManager.setSessionAttributes({
+      currentDate: currentDate,
+      currentTime: currentTime
+    });
+
+    return prediction.getPredictions(routeIds, STOP_ID, currentDate, currentTime)
       .then((predictions) => {
-        const speechOutput = `Good morning my bad rabbit! The current time is now ${currentTime}. `
+        const speechOutput = `Good morning my bad rabbit! The current time is now ${currentTimeSpeech}. `
           + `${predictions} ${followUpPrompt}`;
         const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
 
@@ -32,10 +40,35 @@ const LaunchRequestHandler = {
           .speak(speechOutput)
           .reprompt(repromptSpeech)
           .withSimpleCard(SKILL_NAME, speechOutput)
-          .withShouldEndSession(true)
+          .withShouldEndSession(false)
           .getResponse();
       });
   }
+};
+
+const AskQuestionIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'AskQuestionIntent';
+  },
+  handle(handlerInput) {
+    const repromptSpeech = 'I did not quite get that.  Do you want to ask for a specific route?';
+    const followUpPrompt = 'What else would you like to know?'
+    const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
+
+    let attributes = handlerInput.attributesManager.getSessionAttributes();
+
+    return prediction.getPredictions([routeId], STOP_ID, attributes.currentDate, attributes.currentTime)
+      .then((predictions) => {
+        const speechOutput = `${predictions} ${followUpPrompt}`;
+
+        return handlerInput.responseBuilder
+          .speak(speechOutput)
+          .reprompt(repromptSpeech)
+          .withShouldEndSession(false)
+          .getResponse();
+      });
+  },
 };
 
 const HelpIntentHandler = {
@@ -109,6 +142,7 @@ const ErrorHandler = {
 
     return handlerInput.responseBuilder
       .speak('Sorry, I ran into some error. Please try again later.')
+      .withShouldEndSession(true)
       .getResponse();
   }
 };
@@ -118,6 +152,7 @@ const skillBuilder = Alexa.SkillBuilders.custom();
 exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
+    AskQuestionIntentHandler,
     HelpIntentHandler,
     CancelIntentHandler,
     StopIntentHandler,
