@@ -1,0 +1,12 @@
+{
+  "name": "alexa-mbta-bus-time",
+  "version": "1.0.0",
+  "private": true,
+  "dependencies": {
+    "ask-sdk-core": "^2.0.0",
+    "ask-sdk-model": "^1.0.0",
+    "request": "^2.88.0",
+    "request-promise": "^4.2.2",
+    "underscore": "^1.9.1"
+  }
+}
