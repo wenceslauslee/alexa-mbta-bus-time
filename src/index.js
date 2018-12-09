@@ -6,7 +6,7 @@ const _ = require('underscore');
 
 const APP_ID = 'amzn1.ask.skill.dd081fb8-e2fc-498e-bd62-02a4bd761590';
 const SKILL_NAME = 'MBTA Bus Time';
-const HELP_MESSAGE = 'You can say where is bus number 11, or, you can say give me a summary.';
+const HELP_MESSAGE = 'You can say where is route 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
 const STOP_MESSAGE = 'Goodbye and safe trip!';
 const STOP_ID = 86963; //TODO: Hard coded for now.
@@ -21,7 +21,7 @@ const LaunchRequestHandler = {
 
     const currentDateTime = moment().utc().tz(TIME_ZONE);
     const currentDate = currentDateTime.format('YYYY-MM-DD');
-    const currentTimeSpeech = currentDateTime.format('hh:mm A');
+    const currentTimeSpeech = currentDateTime.format('h:mm A');
     const currentTime = currentDateTime.format('HH:mm');
     const followUpPrompt = 'What else would you like to know?';
 
@@ -30,7 +30,7 @@ const LaunchRequestHandler = {
       currentTime: currentTime
     });
 
-    const initialSpeechOutput = `Good morning my bad rabbit! The current time is now ${currentTimeSpeech}. `;
+    const initialSpeechOutput = `The current time is ${currentTimeSpeech}. `;
     await callDirectiveServiceOnStart(handlerInput, initialSpeechOutput);
 
     return prediction.getPredictions(routeIds, STOP_ID, currentDate, currentTime)
@@ -136,7 +136,7 @@ const FallbackIntentHandler = {
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
-      .speak('Oops I do not understand. Please try again.')
+      .speak('Sorry, I do not understand. Please try again.')
       .withShouldEndSession(false)
       .getResponse();
   },
