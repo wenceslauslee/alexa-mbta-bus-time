@@ -11,7 +11,7 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
     return q.all([predictionPromise, earliestSchedulePromise])
       .then((results) => {
         if (!results[1]) {
-          return `There are no scheduled trips for route ${routeId} today.`;
+          return `There are no more scheduled trips for route ${routeId} today.`;
         }
         if (results[0].length === 0) {
           return `There are currently no predictions for route ${routeId}. `
