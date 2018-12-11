@@ -43,5 +43,5 @@ function formatToLocalTime(isoTime) {
 }
 
 module.exports = {
-    getPredictions: getPredictions
+  getPredictions: getPredictions
 };
