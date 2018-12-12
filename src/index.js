@@ -1,13 +1,10 @@
 const Alexa = require('ask-sdk-core');
-const httpRequest = require('request-promise');
-const prediction = require('./prediction');
+const indexHelper = require('./index-helper');
 const timeHelper = require('./time-helper');
-const _ = require('underscore');
 
-const APP_ID = 'amzn1.ask.skill.dd081fb8-e2fc-498e-bd62-02a4bd761590';
-const SKILL_NAME = 'MBTA Bus Time';
 const HELP_MESSAGE = 'You can say where is route 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
+const ROUTE_IDS = [553, 554, 556];
 const STOP_MESSAGE = 'Goodbye and safe trip!';
 const STOP_ID = 86963; //TODO: Hard coded for now.
 
@@ -15,45 +12,10 @@ const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
-  async handle(handlerInput) {
-    return GetSummaryIntentHandler.handle(handlerInput);
+  handle(handlerInput) {
+    return indexHelper.getSummary(handlerInput, ROUTE_IDS, STOP_ID)
   }
 };
-
-function callDirectiveServiceOnStart(handlerInput, initialSpeechOutput) {
-  const requestEnvelope = handlerInput.requestEnvelope;
-  const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
-  const requestId = requestEnvelope.request.requestId;
-
-  const directive = {
-    header: {
-      requestId,
-    },
-    directive: {
-      type: 'VoicePlayer.Speak',
-      speech: initialSpeechOutput,
-    },
-  };
-
-  return directiveServiceClient.enqueue(directive);
-}
-
-function getSummary(routeIds, stopId, timeAttributes, currentTimeSpeech, handlerInput) {
-  return prediction.getPredictions(
-      routeIds, stopId, timeAttributes.currentDate, timeAttributes.currentTime)
-    .then((predictions) => {
-      const followUpPrompt = 'What else would you like to know?';
-      const speechOutput = `${predictions} ${followUpPrompt}`;
-      const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
-
-      return handlerInput.responseBuilder
-        .speak(speechOutput)
-        .reprompt(repromptSpeech)
-        .withSimpleCard(SKILL_NAME, `${currentTimeSpeech} speechOutput`)
-        .withShouldEndSession(false)
-        .getResponse();
-    });
-}
 
 const AskQuestionIntentHandler = {
   canHandle(handlerInput) {
@@ -61,24 +23,7 @@ const AskQuestionIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'AskQuestionIntent';
   },
   handle(handlerInput) {
-    const repromptSpeech = 'I did not quite get that.  Do you want to ask for a specific route?';
-    const followUpPrompt = 'What else would you like to know?'
-    const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
-
-    const timeAttributes = timeHelper.getTimeAttributes();
-    const currentTimeSpeech = `The current time is ${timeAttributes.currentTimeSpeech}. `;
-
-    return prediction.getPredictions([routeId], STOP_ID, timeAttributes.currentDate, timeAttributes.currentTime)
-      .then((predictions) => {
-        const speechOutput = `${predictions} ${followUpPrompt}`;
-
-        return handlerInput.responseBuilder
-          .speak(speechOutput)
-          .reprompt(repromptSpeech)
-          .withSimpleCard(SKILL_NAME, `${currentTimeSpeech} speechOutput`)
-          .withShouldEndSession(false)
-          .getResponse();
-      });
+    return indexHelper.getRoute(handlerInput, STOP_ID);
   },
 };
 
@@ -87,14 +32,38 @@ const GetSummaryIntentHandler = {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === 'GetSummaryIntent';
   },
-  async handle(handlerInput) {
-    const routeIds = [553, 554, 556];
-    const timeAttributes = timeHelper.getTimeAttributes();
-    
-    const initialSpeechOutput = `The current time is ${timeAttributes.currentTimeSpeech}. `;  
-    await callDirectiveServiceOnStart(handlerInput, initialSpeechOutput);
+  handle(handlerInput) {
+    return indexHelper.getSummary(handlerInput, ROUTE_IDS, STOP_ID);
+  },
+};
 
-    return getSummary(routeIds, STOP_ID, timeAttributes, initialSpeechOutput, handlerInput);
+const SetStopIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'SetStopIntent';
+  },
+  handle(handlerInput) {
+    
+  },
+};
+
+const AddRouteIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'AddRouteIntent';
+  },
+  handle(handlerInput) {
+    
+  },
+};
+
+const RemoveRouteIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'RemoveRouteIntent';
+  },
+  handle(handlerInput) {
+    
   },
 };
 
@@ -120,6 +89,7 @@ const CancelIntentHandler = {
   handle(handlerInput) {
     return handlerInput.responseBuilder
       .speak(STOP_MESSAGE)
+      .withShouldEndSession(true)
       .getResponse();
   },
 };
@@ -132,6 +102,7 @@ const StopIntentHandler = {
   handle(handlerInput) {
     return handlerInput.responseBuilder
       .speak(STOP_MESSAGE)
+      .withShouldEndSession(true)
       .getResponse();
   }
 };
@@ -158,6 +129,7 @@ const SessionEndedRequestHandler = {
 
     return handlerInput.responseBuilder
       .speak(STOP_MESSAGE)
+      .withShouldEndSession(true)
       .getResponse();
   },
 };
@@ -183,6 +155,9 @@ exports.handler = skillBuilder
     LaunchRequestHandler,
     AskQuestionIntentHandler,
     GetSummaryIntentHandler,
+    SetStopIntentHandler,
+    AddRouteIntentHandler,
+    RemoveRouteIntentHandler,
     HelpIntentHandler,
     CancelIntentHandler,
     StopIntentHandler,

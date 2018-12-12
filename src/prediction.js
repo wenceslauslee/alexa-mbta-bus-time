@@ -1,4 +1,4 @@
-const mbta = require('./mbtaApi');
+const mbta = require('./mbta-api');
 const moment = require('moment-timezone');
 const q = require('q');
 const _ = require('underscore');
