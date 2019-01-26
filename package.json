@@ -5,7 +5,7 @@
   "dependencies": {
     "ask-sdk-core": "^2.0.0",
     "ask-sdk-model": "^1.0.0",
-    "dynamodb": "^1.1.2",
+    "aws-sdk": "^2.395.0",
     "moment": "^2.22.2",
     "moment-timezone": "^0.5.23",
     "q": "^1.5.1",

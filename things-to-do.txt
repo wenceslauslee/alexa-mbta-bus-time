@@ -2,3 +2,6 @@ Reorganize functions to minimize index.js complexity
 Use DynamoDB to retrieve data
 Create flow to store data into DynamoDB
 Add top bus routes mapping to specific stop
+
+
+rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTime --zip-file fileb://bus-time.zip

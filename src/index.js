@@ -4,23 +4,21 @@ const timeHelper = require('./time-helper');
 
 const HELP_MESSAGE = 'You can say where is route 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
-const ROUTE_IDS = [553, 554, 556];
-const STOP_MESSAGE = 'Goodbye and safe trip!';
-const STOP_ID = 86963; //TODO: Hard coded for now.
+const STOP_MESSAGE = 'Goodbye!';
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    return indexHelper.getSummary(handlerInput, ROUTE_IDS, STOP_ID)
+    return indexHelper.getSummary(handlerInput)
   }
 };
 
-const AskQuestionIntentHandler = {
+const GetRouteIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AskQuestionIntent';
+      && handlerInput.requestEnvelope.request.intent.name === 'GetRouteIntent';
   },
   handle(handlerInput) {
     return indexHelper.getRoute(handlerInput, STOP_ID);
@@ -33,7 +31,7 @@ const GetSummaryIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'GetSummaryIntent';
   },
   handle(handlerInput) {
-    return indexHelper.getSummary(handlerInput, ROUTE_IDS, STOP_ID);
+    return indexHelper.getSummary(handlerInput);
   },
 };
 
@@ -153,7 +151,7 @@ const skillBuilder = Alexa.SkillBuilders.custom();
 exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
-    AskQuestionIntentHandler,
+    GetRouteIntentHandler,
     GetSummaryIntentHandler,
     SetStopIntentHandler,
     AddRouteIntentHandler,
