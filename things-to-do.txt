@@ -1,5 +1,4 @@
-Reorganize functions to minimize index.js complexity
-Use DynamoDB to retrieve data
+Use DynamoDB to store data
 Create flow to store data into DynamoDB
 Add top bus routes mapping to specific stop
 

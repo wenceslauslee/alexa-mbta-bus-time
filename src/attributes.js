@@ -1,5 +1,9 @@
 const _ = require('underscore');
 
+function getAttributes(handlerInput) {
+  return handlerInput.attributesManager.getSessionAttributes();
+}
+
 function setAttributes(handlerInput, attributesToSet) {
   const attributesManager = handlerInput.attributesManager
   var existingAttributes = attributesManager.getSessionAttributes();
@@ -15,5 +19,6 @@ function setAttributes(handlerInput, attributesToSet) {
 }
 
 module.exports = {
+  getAttributes: getAttributes,
   setAttributes: setAttributes
 };

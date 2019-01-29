@@ -2,6 +2,7 @@ const attributes = require('./attributes');
 const dbInfo = require('./db-info');
 const prediction = require('./prediction');
 const timeHelper = require('./time-helper');
+const _ = require('underscore');
 
 const SKILL_NAME = 'MBTA Bus Time';
 
@@ -26,6 +27,7 @@ function callDirectiveService(handlerInput, speechOutput) {
 }
 
 async function getSummary(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const followUpPrompt = 'Would you like to do anything else?';
   const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
   const timeAttributes = timeHelper.getTimeAttributes();
@@ -33,48 +35,78 @@ async function getSummary(handlerInput) {
 
   return callDirectiveService(handlerInput, initialSpeechOutput)
     .then(() => {
-      return dbInfo.retrieve('test123')
-        .then(data => {
-          if (data) {
+      const sessionAttributes = attributes.getAttributes(handlerInput);
+      if (_.isEmpty(sessionAttributes)) {
+        return dbInfo.retrieve(deviceId)
+          .then(data => {
             attributes.setAttributes(handlerInput, data);
-            return prediction.getPredictions(
-                data.routeIds, data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
-              .then((predictions) => {
-                const speechOutput = `${predictions} ${followUpPrompt}`;
+            return data;
+          });
+      }
+      return Promise.resolve(sessionAttributes);
+    })
+    .then(data => {
+      if (data) {        
+        return prediction.getPredictions(
+            data.routeIds, data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
+          .then((predictions) => {
+            const speechOutput = `${predictions} ${followUpPrompt}`;
 
-                return handlerInput.responseBuilder
-                  .speak(speechOutput)
-                  .reprompt(repromptSpeech)
-                  .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
-                  .withShouldEndSession(false)
-                  .getResponse();
-              });
-          } else {
-            // Prompt user to register stop and route.
-          }
-        });
-    });  
+            return handlerInput.responseBuilder
+              .speak(speechOutput)
+              .reprompt(repromptSpeech)
+              .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+              .withShouldEndSession(false)
+              .getResponse();
+          });
+      } else {
+        // Prompt user to register stop and route.
+      }
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
 }
 
-function getRoute(handlerInput, stopId) {
+function getRoute(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const followUpPrompt = 'Would you like to do anything else?';
   const repromptSpeech = 'I did not quite get that.  Do you want to ask for a specific route?';
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
   const timeAttributes = timeHelper.getTimeAttributes();
-  const currentTimeSpeech = `The current time is ${timeAttributes.currentTimeSpeech}. `;
+  const initialSpeechOutput = `The current time is ${timeAttributes.currentTimeSpeech}. `;
 
-  return prediction.getPredictions(
-      [routeId], stopId, timeAttributes.currentDate, timeAttributes.currentTime)
-    .then((predictions) => {
-      const speechOutput = `${predictions} ${followUpPrompt}`;
+  return callDirectiveService(handlerInput, initialSpeechOutput)
+    .then(() => {
+      const sessionAttributes = attributes.getAttributes(handlerInput);
+      if (_.isEmpty(sessionAttributes)) {
+        return dbInfo.retrieve(deviceId)
+          .then(data => {
+            attributes.setAttributes(handlerInput, data);
+            return data;
+          });
+      }
+      return Promise.resolve(sessionAttributes);
+    })
+    .then(data => {
+      if (data) {
+        return prediction.getPredictions(
+            [routeId], data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
+          .then((predictions) => {
+            const speechOutput = `${predictions} ${followUpPrompt}`;
 
-      return handlerInput.responseBuilder
-        .speak(speechOutput)
-        .reprompt(repromptSpeech)
-        .withSimpleCard(SKILL_NAME, `${currentTimeSpeech} ${speechOutput}`)
-        .withShouldEndSession(false)
-        .getResponse();
-    });
+            return handlerInput.responseBuilder
+              .speak(speechOutput)
+              .reprompt(repromptSpeech)
+              .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+              .withShouldEndSession(false)
+              .getResponse();
+          });
+      } else {
+        // Prompt user to register stop and route
+      }
+    });  
 }
 
 module.exports = {

@@ -21,7 +21,7 @@ const GetRouteIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'GetRouteIntent';
   },
   handle(handlerInput) {
-    return indexHelper.getRoute(handlerInput, STOP_ID);
+    return indexHelper.getRoute(handlerInput);
   },
 };
 
