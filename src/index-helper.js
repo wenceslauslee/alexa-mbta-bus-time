@@ -26,7 +26,7 @@ function callDirectiveService(handlerInput, speechOutput) {
   return directiveServiceClient.enqueue(directive, endpoint, token);
 }
 
-async function getSummary(handlerInput) {
+function getSummary(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const followUpPrompt = 'Would you like to do anything else?';
   const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
@@ -109,8 +109,18 @@ function getRoute(handlerInput) {
     });  
 }
 
+function addStop(handlerInput) {
+
+}
+
+function addRoute(handlerInput) {
+
+}
+
 module.exports = {
   callDirectiveService: callDirectiveService,
   getSummary: getSummary,
-  getRoute: getRoute
+  getRoute: getRoute,
+  addStop: addStop,
+  addRoute: addRoute
 };

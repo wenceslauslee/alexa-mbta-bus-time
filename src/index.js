@@ -41,7 +41,7 @@ const SetStopIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'SetStopIntent';
   },
   handle(handlerInput) {
-    
+    return indexHelper.addStop(handlerInput);
   },
 };
 
@@ -51,7 +51,7 @@ const AddRouteIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'AddRouteIntent';
   },
   handle(handlerInput) {
-    
+    return indexHelper.addRoute(handlerInput);
   },
 };
 
