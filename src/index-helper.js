@@ -110,11 +110,84 @@ function getRoute(handlerInput) {
 }
 
 function addStop(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+  const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
+  const actionConfirmation = `Adding stop ${stopId}.`;
+  const followupPrompt = `What else?`;
+  const repromptSpeech = 'I did not quite get that.  Do you want to add a specific stop?';
+  const speechOutput = `${actionConfirmation} ${followupPrompt}`;
 
+  const sessionAttributes = attributes.getAttributes(handlerInput);
+  return new Promise(() => {
+    if (_.isEmpty(sessionAttributes)) {
+      return dbInfo.retrieve(deviceId)
+        .then(data => {
+          attributes.setAttributes(handlerInput, data);
+          return data;
+        });
+    }
+    return Promise.resolve(sessionAttributes);
+  })
+    .then(sessionAttributes => {
+      sessionAttributes.stopId = stopId;
+      sessionAttributes.routeIds = [];
+      return dbInfo.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
+        .then(() => sessionAttributes);
+    })
+    .then(sessionAttributes => {
+      attributes.setAttributes(handlerInput, sessionAttributes);
+
+      return handlerInput.responseBuilder
+        .speak(speechOutput)
+        .reprompt(repromptSpeech)
+        .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+        .withShouldEndSession(false)
+        .getResponse();
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
 }
 
 function addRoute(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+  const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
+  const actionConfirmation = `Adding ${routeId} into saved routes.`;
+  const followupPrompt = `What else?`;
+  const repromptSpeech = 'I did not quite get that.  Do you want to add a specific route?';
+  const speechOutput = `${actionConfirmation} ${followupPrompt}`;
 
+  const sessionAttributes = attributes.getAttributes(handlerInput);
+  return new Promise(() => {
+    if (_.isEmpty(sessionAttributes)) {
+      return dbInfo.retrieve(deviceId)
+        .then(data => {
+          attributes.setAttributes(handlerInput, data);
+          return data;
+        });
+    }
+    return Promise.resolve(sessionAttributes);
+  })
+    .then(sessionAttributes => {
+      sessionAttributes.routeIds.push(routeId);
+      return dbInfo.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
+        .then(() => sessionAttributes);
+    })
+    .then(sessionAttributes => {
+      attributes.setAttributes(handlerInput, sessionAttributes);
+
+      return handlerInput.responseBuilder
+        .speak(speechOutput)
+        .reprompt(repromptSpeech)
+        .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+        .withShouldEndSession(false)
+        .getResponse();
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
 }
 
 module.exports = {

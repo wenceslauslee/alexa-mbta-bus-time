@@ -5,7 +5,7 @@ AWS.config.update({
 });
 
 const docClient = new AWS.DynamoDB.DocumentClient();
-const tableName = 'mbta-bus-time';
+const tableName = 'mbtabustime-stop-route';
 
 function create(deviceId, stopId, routeIds) {
   const params = {

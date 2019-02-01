@@ -9,10 +9,10 @@ function setAttributes(handlerInput, attributesToSet) {
   var existingAttributes = attributesManager.getSessionAttributes();
 
   if (!existingAttributes) {
-  	attributesManager.setSessionAttributes(attributesToSet);
+    attributesManager.setSessionAttributes(attributesToSet);
   } else {
-  	existingAttributes = _.extend(attributesToSet, existingAttributes);
-  	attributesManager.setSessionAttributes(existingAttributes);
+    existingAttributes = _.extend(attributesToSet, existingAttributes);
+    attributesManager.setSessionAttributes(existingAttributes);
   }
 
   return;
