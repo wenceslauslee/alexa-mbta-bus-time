@@ -7,7 +7,7 @@ function create(deviceId, stopId, routeIds) {
 function query(deviceId) {
   return db.query(deviceId)
   	.then(data => {
-  	  if (data.length >= 1) {
+  	  if (data && data.length >= 1) {
   	  	// return 1 item for now
   	  	return data[0];
   	  }

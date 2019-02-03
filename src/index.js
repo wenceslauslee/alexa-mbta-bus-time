@@ -65,6 +65,16 @@ const RemoveRouteIntentHandler = {
   },
 };
 
+const NumberIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'NumberIntent';
+  },
+  handle(handlerInput) {
+    return indexHelper.handleNumberInput(handlerInput);
+  },
+}
+
 const HelpIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -156,6 +166,7 @@ exports.handler = skillBuilder
     SetStopIntentHandler,
     AddRouteIntentHandler,
     RemoveRouteIntentHandler,
+    NumberIntentHandler,
     HelpIntentHandler,
     CancelIntentHandler,
     StopIntentHandler,

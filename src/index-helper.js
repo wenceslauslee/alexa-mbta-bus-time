@@ -32,21 +32,31 @@ function getSummary(handlerInput) {
   const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
   const timeAttributes = timeHelper.getTimeAttributes();
   const initialSpeechOutput = `The current time is ${timeAttributes.currentTimeSpeech}.`;
+  const sessionAttributes = attributes.getAttributes(handlerInput);
 
   return callDirectiveService(handlerInput, initialSpeechOutput)
-    .then(() => {
-      const sessionAttributes = attributes.getAttributes(handlerInput);
+    .then(() => {      
       if (_.isEmpty(sessionAttributes)) {
-        return dbInfo.query(deviceId)
-          .then(data => {
-            attributes.setAttributes(handlerInput, data);
-            return data;
-          });
+        return dbInfo.query(deviceId);
       }
       return Promise.resolve(sessionAttributes);
     })
     .then(data => {
-      if (data) {        
+      if (!data) {
+        sessionAttributes.currentState = 'SetStopIntent';
+        attributes.setAttributes(handlerInput, sessionAttributes);
+        const speechOutput = `We could not find any data related to your device. `
+          + `Let's start by setting up your information for you now. `
+          + `What stop number would you like to use by default?`;
+
+        return handlerInput.responseBuilder
+          .speak(speechOutput)
+          .reprompt(repromptSpeech)
+          .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+          .withShouldEndSession(false)
+          .getResponse();
+      } else if (data.stopId && data.routeIds && data.routeIds.length != 0) {     
+        attributes.setAttributes(handlerInput, data);   
         return prediction.getPredictions(
             data.routeIds, data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
           .then((predictions) => {
@@ -59,8 +69,6 @@ function getSummary(handlerInput) {
               .withShouldEndSession(false)
               .getResponse();
           });
-      } else {
-        // Prompt user to register stop and route.
       }
     })
     .catch(err => {
@@ -190,10 +198,70 @@ function addRoute(handlerInput) {
     });
 }
 
+function handleNumberInput(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+  const number = handlerInput.requestEnvelope.request.intent.slots.Number.value;
+  const stopConfirmation = `Adding ${number} into saved stops. What route would you like to add to this stop?`;
+  const routeConfirmation = `Adding ${number} into saved routes. Would you like to do anything else?`;
+  const repromptSpeech = 'I did not quite get that.  Can you repeat that again?';
+  let speechOutput = '';
+
+  const sessionAttributes = attributes.getAttributes(handlerInput);
+  const currentState = sessionAttributes['currentState'];
+  if (!currentState) {
+    speechOutput = 'I did not understand that. Would you like to get a summary of the routes at your stop?';
+    // TODO: Figure out how to route this to the get summary intent if yes, otherwise exit on no.
+    return handlerInput.responseBuilder
+        .speak(speechOutput)
+        .reprompt(repromptSpeech)
+        .withSimpleCard(SKILL_NAME, speechOutput)
+        .withShouldEndSession(false)
+        .getResponse();
+  } else if (currentState === 'SetStopIntent') {
+    sessionAttributes.stopId = number;
+    sessionAttributes.currentState = 'AddRouteIntent';
+    attributes.setAttributes(handlerInput, sessionAttributes);
+
+    return handlerInput.responseBuilder
+      .speak(stopConfirmation)
+      .reprompt(repromptSpeech)
+      .withSimpleCard(SKILL_NAME, stopConfirmation)
+      .withShouldEndSession(false)
+      .getResponse();
+  } else if (currentState === 'AddRouteIntent') {
+    if (!sessionAttributes.routeIds) {
+      sessionAttributes.routeIds = [number];
+    } else {
+      sessionAttributes.routeIds.push(number);
+    }
+    sessionAttributes.currentState = null;
+    attributes.setAttributes(handlerInput, sessionAttributes);
+
+    return dbInfo.create(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
+      .then(() => {
+        return handlerInput.responseBuilder
+          .speak(routeConfirmation)
+          .reprompt(repromptSpeech)
+          .withSimpleCard(SKILL_NAME, routeConfirmation)
+          .withShouldEndSession(false)
+          .getResponse();
+        })
+      .catch(err => {
+        console.log(err);
+        throw err;
+      });
+  } else {
+    const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
+    console.log(errorMessage);
+    throw new Error(errorMessage);
+  }
+}
+
 module.exports = {
   callDirectiveService: callDirectiveService,
   getSummary: getSummary,
   getRoute: getRoute,
   addStop: addStop,
-  addRoute: addRoute
+  addRoute: addRoute,
+  handleNumberInput: handleNumberInput,
 };
