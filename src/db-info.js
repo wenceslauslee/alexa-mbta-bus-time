@@ -4,12 +4,23 @@ function create(deviceId, stopId, routeIds) {
   return db.create(deviceId, stopId, routeIds);
 }
 
-function retrieve(deviceId) {
-  return db.retrieve(deviceId);
+function query(deviceId) {
+  return db.query(deviceId)
+  	.then(data => {
+  	  if (data.length >= 1) {
+  	  	// return 1 item for now
+  	  	return data[0];
+  	  }
+  	  return null;
+  	});
 }
 
-function remove(deviceId) {
-  return db.remove(deviceId);
+function retrieve(deviceId, stopId) {
+  return db.retrieve(deviceId, stopId);
+}
+
+function remove(deviceId, stopId) {
+  return db.remove(deviceId, stopId);
 }
 
 function update(deviceId, stopId, routeIds) {
@@ -18,6 +29,7 @@ function update(deviceId, stopId, routeIds) {
 
 module.exports = {
   create: create,
+  query: query,
   remove: remove,
   retrieve: retrieve,
   update: update

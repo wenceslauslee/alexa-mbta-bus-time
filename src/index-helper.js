@@ -37,7 +37,7 @@ function getSummary(handlerInput) {
     .then(() => {
       const sessionAttributes = attributes.getAttributes(handlerInput);
       if (_.isEmpty(sessionAttributes)) {
-        return dbInfo.retrieve(deviceId)
+        return dbInfo.query(deviceId)
           .then(data => {
             attributes.setAttributes(handlerInput, data);
             return data;
@@ -81,7 +81,7 @@ function getRoute(handlerInput) {
     .then(() => {
       const sessionAttributes = attributes.getAttributes(handlerInput);
       if (_.isEmpty(sessionAttributes)) {
-        return dbInfo.retrieve(deviceId)
+        return dbInfo.query(deviceId)
           .then(data => {
             attributes.setAttributes(handlerInput, data);
             return data;
@@ -120,7 +120,7 @@ function addStop(handlerInput) {
   const sessionAttributes = attributes.getAttributes(handlerInput);
   return new Promise(() => {
     if (_.isEmpty(sessionAttributes)) {
-      return dbInfo.retrieve(deviceId)
+      return dbInfo.query(deviceId)
         .then(data => {
           attributes.setAttributes(handlerInput, data);
           return data;
@@ -161,7 +161,7 @@ function addRoute(handlerInput) {
   const sessionAttributes = attributes.getAttributes(handlerInput);
   return new Promise(() => {
     if (_.isEmpty(sessionAttributes)) {
-      return dbInfo.retrieve(deviceId)
+      return dbInfo.query(deviceId)
         .then(data => {
           attributes.setAttributes(handlerInput, data);
           return data;

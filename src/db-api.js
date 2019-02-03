@@ -16,6 +16,7 @@ function create(deviceId, stopId, routeIds) {
       "routeIds": routeIds
     }
   };
+  console.log(params);
 
   return docClient.put(params).promise()
     .then(() => {
@@ -27,13 +28,37 @@ function create(deviceId, stopId, routeIds) {
     });
 }
 
-function retrieve(deviceId) {
+function query(deviceId) {
+  const params = {
+    TableName : tableName,
+    ProjectionExpression:"stopId, routeIds",
+    KeyConditionExpression: "deviceId = :d",
+    ExpressionAttributeValues: {
+      ":d": deviceId
+    }
+  };
+  console.log(params);
+
+  return docClient.query(params).promise()
+    .then(data => {
+      console.log('DB data query successful');
+      return data.Item;
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
+}
+
+function retrieve(deviceId, stopId) {
   const params = {
     TableName: tableName,
     Key: {
-      "deviceId": deviceId
+      "deviceId": deviceId,
+      "stopId": stopId
     }
   };
+  console.log(params);
   
   return docClient.get(params).promise()
     .then(data => {
@@ -46,17 +71,19 @@ function retrieve(deviceId) {
     });
 }
 
-function remove(deviceId) {
+function remove(deviceId, stopId) {
   const params = {
     TableName: tableName,
     Key: {
-      "deviceId": deviceId
+      "deviceId": deviceId,
+      "stopId": stopId
     }
   };
+  console.log(params);
 
   return docClient.delete(params).promise()
     .then(() => {
-      console.log('DB data deletion successful');
+      console.log('DB data delete successful');
     })
     .catch(err => {
       console.log(err);
@@ -77,6 +104,7 @@ function update(deviceId, stopId, routeIds) {
     },
     ReturnValues: "UPDATED_NEW"
   };
+  console.log(params);
 
   return docClient.update(params).promise()
     .then(() => {
@@ -90,6 +118,7 @@ function update(deviceId, stopId, routeIds) {
 
 module.exports = {
   create: create,
+  query: query,
   remove: remove,
   retrieve: retrieve,
   update: update
