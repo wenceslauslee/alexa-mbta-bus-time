@@ -1,4 +1,5 @@
 const attributes = require('./attributes');
+const constants = require('./constants');
 const dbInfo = require('./db-info');
 const prediction = require('./prediction');
 const timeHelper = require('./time-helper');
@@ -28,8 +29,6 @@ function callDirectiveService(handlerInput, speechOutput) {
 
 function getSummary(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
-  const followUpPrompt = 'Would you like to do anything else?';
-  const repromptSpeech = 'I did not quite get that.  Would you like to get a summary?';
   const timeAttributes = timeHelper.getTimeAttributes();
   const initialSpeechOutput = `The current time is ${timeAttributes.currentTimeSpeech}.`;
   const sessionAttributes = attributes.getAttributes(handlerInput);
@@ -43,15 +42,14 @@ function getSummary(handlerInput) {
     })
     .then(data => {
       if (!data) {
-        sessionAttributes.currentState = 'SetStopIntent';
+        sessionAttributes.currentState = constants.ADD_STOP_INTENT;
         attributes.setAttributes(handlerInput, sessionAttributes);
         const speechOutput = `We could not find any data related to your device. `
-          + `Let's start by setting up your information for you now. `
           + `What stop number would you like to use by default?`;
 
         return handlerInput.responseBuilder
           .speak(speechOutput)
-          .reprompt(repromptSpeech)
+          .reprompt(constants.REPROMPT_GET_SUMMARY)
           .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
           .withShouldEndSession(false)
           .getResponse();
@@ -60,11 +58,11 @@ function getSummary(handlerInput) {
         return prediction.getPredictions(
             data.routeIds, data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
           .then((predictions) => {
-            const speechOutput = `${predictions} ${followUpPrompt}`;
+            const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
 
             return handlerInput.responseBuilder
               .speak(speechOutput)
-              .reprompt(repromptSpeech)
+              .reprompt(constants.REPROMPT_GET_SUMMARY)
               .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
               .withShouldEndSession(false)
               .getResponse();
@@ -79,8 +77,6 @@ function getSummary(handlerInput) {
 
 function getRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
-  const followUpPrompt = 'Would you like to do anything else?';
-  const repromptSpeech = 'I did not quite get that.  Do you want to ask for a specific route?';
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
   const timeAttributes = timeHelper.getTimeAttributes();
   const initialSpeechOutput = `The current time is ${timeAttributes.currentTimeSpeech}. `;
@@ -102,11 +98,11 @@ function getRoute(handlerInput) {
         return prediction.getPredictions(
             [routeId], data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
           .then((predictions) => {
-            const speechOutput = `${predictions} ${followUpPrompt}`;
+            const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
 
             return handlerInput.responseBuilder
               .speak(speechOutput)
-              .reprompt(repromptSpeech)
+              .reprompt(constants.REPROMPT_GET_ROUTE)
               .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
               .withShouldEndSession(false)
               .getResponse();
@@ -120,10 +116,7 @@ function getRoute(handlerInput) {
 function addStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
-  const actionConfirmation = `Adding stop ${stopId}.`;
-  const followupPrompt = `What else?`;
-  const repromptSpeech = 'I did not quite get that.  Do you want to add a specific stop?';
-  const speechOutput = `${actionConfirmation} ${followupPrompt}`;
+  const speechOutput = `Adding stop ${stopId}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
   return new Promise(() => {
@@ -147,7 +140,7 @@ function addStop(handlerInput) {
 
       return handlerInput.responseBuilder
         .speak(speechOutput)
-        .reprompt(repromptSpeech)
+        .reprompt(constants.REPROMPT_ADD_STOP)
         .withSimpleCard(SKILL_NAME, `${speechOutput}`)
         .withShouldEndSession(false)
         .getResponse();
@@ -161,22 +154,9 @@ function addStop(handlerInput) {
 function addRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
-  const actionConfirmation = `Adding ${routeId} into saved routes.`;
-  const followupPrompt = `What else?`;
-  const repromptSpeech = 'I did not quite get that.  Do you want to add a specific route?';
-  const speechOutput = `${actionConfirmation} ${followupPrompt}`;
-
-  const sessionAttributes = attributes.getAttributes(handlerInput);
-  return new Promise(() => {
-    if (_.isEmpty(sessionAttributes)) {
-      return dbInfo.query(deviceId)
-        .then(data => {
-          attributes.setAttributes(handlerInput, data);
-          return data;
-        });
-    }
-    return Promise.resolve(sessionAttributes);
-  })
+  const speechOutput = `Adding ${routeId} into saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  
+  return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
       sessionAttributes.routeIds.push(routeId);
       return dbInfo.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
@@ -187,7 +167,7 @@ function addRoute(handlerInput) {
 
       return handlerInput.responseBuilder
         .speak(speechOutput)
-        .reprompt(repromptSpeech)
+        .reprompt(constants.REPROMPT_ADD_ROUTE)
         .withSimpleCard(SKILL_NAME, `${speechOutput}`)
         .withShouldEndSession(false)
         .getResponse();
@@ -201,34 +181,31 @@ function addRoute(handlerInput) {
 function handleNumberInput(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const number = handlerInput.requestEnvelope.request.intent.slots.Number.value;
-  const stopConfirmation = `Adding ${number} into saved stops. What route would you like to add to this stop?`;
-  const routeConfirmation = `Adding ${number} into saved routes. Would you like to do anything else?`;
-  const repromptSpeech = 'I did not quite get that.  Can you repeat that again?';
-  let speechOutput = '';
+  const stopConfirmation = `Adding ${number} into saved stops. ${constants.FOLLOW_UP_ROUTE}`;
+  const routeConfirmation = `Adding ${number} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
   const currentState = sessionAttributes['currentState'];
   if (!currentState) {
-    speechOutput = 'I did not understand that. Would you like to get a summary of the routes at your stop?';
     // TODO: Figure out how to route this to the get summary intent if yes, otherwise exit on no.
     return handlerInput.responseBuilder
-        .speak(speechOutput)
-        .reprompt(repromptSpeech)
-        .withSimpleCard(SKILL_NAME, speechOutput)
+        .speak(constants.REPROMPT_GET_SUMMARY)
+        .reprompt(constants.REPROMPT_GET_SUMMARY)
+        .withSimpleCard(SKILL_NAME, constants.REPROMPT_GET_SUMMARY)
         .withShouldEndSession(false)
         .getResponse();
-  } else if (currentState === 'SetStopIntent') {
+  } else if (currentState === constants.ADD_STOP_INTENT) {
     sessionAttributes.stopId = number;
-    sessionAttributes.currentState = 'AddRouteIntent';
+    sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
     attributes.setAttributes(handlerInput, sessionAttributes);
 
     return handlerInput.responseBuilder
       .speak(stopConfirmation)
-      .reprompt(repromptSpeech)
+      .reprompt(constants.REPROMPT_REPEAT)
       .withSimpleCard(SKILL_NAME, stopConfirmation)
       .withShouldEndSession(false)
       .getResponse();
-  } else if (currentState === 'AddRouteIntent') {
+  } else if (currentState === constants.ADD_ROUTE_INTENT) {
     if (!sessionAttributes.routeIds) {
       sessionAttributes.routeIds = [number];
     } else {
@@ -241,7 +218,7 @@ function handleNumberInput(handlerInput) {
       .then(() => {
         return handlerInput.responseBuilder
           .speak(routeConfirmation)
-          .reprompt(repromptSpeech)
+          .reprompt(constants.REPROMPT_REPEAT)
           .withSimpleCard(SKILL_NAME, routeConfirmation)
           .withShouldEndSession(false)
           .getResponse();
@@ -255,6 +232,18 @@ function handleNumberInput(handlerInput) {
     console.log(errorMessage);
     throw new Error(errorMessage);
   }
+}
+
+function getSessionAttributes(handlerInput, deviceId) {
+  const sessionAttributes = attributes.getAttributes(handlerInput);
+  if (_.isEmpty(sessionAttributes)) {
+    return dbInfo.query(deviceId)
+      .then(data => {
+        attributes.setAttributes(handlerInput, data);
+        return data;
+      });
+  }
+  return Promise.resolve(sessionAttributes);
 }
 
 module.exports = {

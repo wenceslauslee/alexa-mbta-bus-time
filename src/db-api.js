@@ -42,7 +42,8 @@ function query(deviceId) {
   return docClient.query(params).promise()
     .then(data => {
       console.log('DB data query successful');
-      return data.Item;
+      console.log(JSON.stringify(data, null, 2));
+      return data.Items;
     })
     .catch(err => {
       console.log(err);
@@ -62,7 +63,8 @@ function retrieve(deviceId, stopId) {
   
   return docClient.get(params).promise()
     .then(data => {
-      console.log('DB data retrieval successful')
+      console.log('DB data retrieval successful');
+      console.log(JSON.stringify(data, null, 2));
       return data.Item;
     })
     .catch(err => {
@@ -95,11 +97,11 @@ function update(deviceId, stopId, routeIds) {
   const params = {
     TableName: tableName,
     Key: {
-      "deviceId": deviceId
+      "deviceId": deviceId,
+      "stopId": stopId
     },
-    UpdateExpression: "set stopId = :s, routeIds = :r",
+    UpdateExpression: "set routeIds = :r",
     ExpressionAttributeValues: {
-      ":s": stopId,
       ":r": routeIds
     },
     ReturnValues: "UPDATED_NEW"

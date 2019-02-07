@@ -1,4 +1,5 @@
 const Alexa = require('ask-sdk-core');
+const constants = require('./constants');
 const indexHelper = require('./index-helper');
 const timeHelper = require('./time-helper');
 
@@ -38,7 +39,7 @@ const GetSummaryIntentHandler = {
 const SetStopIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'SetStopIntent';
+      && handlerInput.requestEnvelope.request.intent.name === constants.ADD_STOP_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.addStop(handlerInput);
@@ -48,7 +49,7 @@ const SetStopIntentHandler = {
 const AddRouteIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AddRouteIntent';
+      && handlerInput.requestEnvelope.request.intent.name === constants.ADD_ROUTE_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.addRoute(handlerInput);

@@ -1,0 +1,13 @@
+module.exports = {
+	FOLLOW_UP_PROMPT: 'Would you like to do anything else?',
+	FOLLOW_UP_PROMPT_SHORT: 'What else?',
+	FOLLOW_UP_ROUTE: 'What route would you like to add to this stop?',
+  REPROMPT_ADD_ROUTE: 'I did not quite get that.  Would you like to add a specific route?',
+  REPROMPT_ADD_STOP: 'I did not quite get that.  Would you like to add a specific stop?',
+  REPROMPT_GET_ROUTE: 'I did not quite get that.  Would you like to ask for a specific route?',
+	REPROMPT_GET_SUMMARY: 'I did not quite get that.  Would you like to get a summary?',
+	REPROMPT_REPEAT: 'I did not quite get that.  Can you repeat that again?',
+
+	ADD_ROUTE_INTENT: 'AddRouteIntent',
+	ADD_STOP_INTENT: 'SetStopIntent'
+};
