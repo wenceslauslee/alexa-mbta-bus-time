@@ -1,28 +1,6 @@
 const request = require('request-promise');
 const _ = require('underscore');
 
-function getPredictions(routeId, stopId) {
-  return request({
-    uri: `https://api-v3.mbta.com/predictions?filter%5Bstop%5D=${stopId}&filter%5Broute%5D=${routeId}`,
-    headers: {
-      'Authorization': `Bearer ${process.env.mbta_api_key}`
-    },
-    json: true
-  })
-    .then(response => {
-      const predictions = _.map(response.data, data => {
-        return data.attributes.arrival_time;
-      });
-      console.log('Predictions are: ' + predictions);
-
-      return predictions;
-    })
-    .catch(e => {
-      console.log(e);
-      throw e;
-    });
-}
-
 function getEarliestSchedule(routeId, stopId, date, time) {
   const formattedTime = time.replace(':', '%3A');
 
@@ -52,7 +30,48 @@ function getEarliestSchedule(routeId, stopId, date, time) {
     });
 }
 
+function getPredictions(routeId, stopId) {
+  return request({
+    uri: `https://api-v3.mbta.com/predictions?filter%5Bstop%5D=${stopId}&filter%5Broute%5D=${routeId}`,
+    headers: {
+      'Authorization': `Bearer ${process.env.mbta_api_key}`
+    },
+    json: true
+  })
+    .then(response => {
+      const predictions = _.map(response.data, data => {
+        return data.attributes.arrival_time;
+      });
+      console.log('Predictions are: ' + predictions);
+
+      return predictions;
+    })
+    .catch(e => {
+      console.log(e);
+      throw e;
+    });
+}
+
+function getStop(stopId) {
+  return request({
+    uri: `https://api-v3.mbta.com/stops?filter%5Bid%5D=${stopId}&filter%5Broute_type%5D=3`,
+    headers: {
+      'Authorization': `Bearer ${process.env.mbta_api_key}`
+    },
+    json: true
+  })
+    .then(response => {
+      console.log(JSON.stringify(response.data, null, 2));
+      return response.data;
+    })
+    .catch(e => {
+      console.log(e);
+      throw e;
+    });
+}
+
 module.exports = {
   getEarliestSchedule: getEarliestSchedule,
-  getPredictions: getPredictions
+  getPredictions: getPredictions,
+  getStop: getStop
 };

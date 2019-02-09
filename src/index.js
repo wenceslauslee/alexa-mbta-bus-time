@@ -56,6 +56,16 @@ const AddRouteIntentHandler = {
   },
 };
 
+const DeleteStopIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === constants.DELETE_STOP_INTENT;
+  },
+  handle(handlerInput) {
+    return indexHelper.deleteStop(handlerInput);
+  },
+};
+
 const DeleteRouteIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -166,6 +176,7 @@ exports.handler = skillBuilder
     GetSummaryIntentHandler,
     AddStopIntentHandler,
     AddRouteIntentHandler,
+    DeleteStopIntentHandler,
     DeleteRouteIntentHandler,
     NumberIntentHandler,
     HelpIntentHandler,

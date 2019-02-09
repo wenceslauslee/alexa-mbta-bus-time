@@ -5,17 +5,8 @@ AWS.config.update({
 });
 
 const docClient = new AWS.DynamoDB.DocumentClient();
-const tableName = 'mbtabustime-stop-route';
 
-function create(deviceId, stopId, routeIds) {
-  const params = {
-    TableName: tableName,
-    Item: {
-      "deviceId": deviceId,
-      "stopId": stopId,
-      "routeIds": routeIds
-    }
-  };
+function create(params) {
   console.log(params);
 
   return docClient.put(params).promise()
@@ -28,15 +19,7 @@ function create(deviceId, stopId, routeIds) {
     });
 }
 
-function query(deviceId) {
-  const params = {
-    TableName : tableName,
-    ProjectionExpression:"stopId, routeIds",
-    KeyConditionExpression: "deviceId = :d",
-    ExpressionAttributeValues: {
-      ":d": deviceId
-    }
-  };
+function query(params) {  
   console.log(params);
 
   return docClient.query(params).promise()
@@ -51,14 +34,7 @@ function query(deviceId) {
     });
 }
 
-function retrieve(deviceId, stopId) {
-  const params = {
-    TableName: tableName,
-    Key: {
-      "deviceId": deviceId,
-      "stopId": stopId
-    }
-  };
+function retrieve(params) {
   console.log(params);
   
   return docClient.get(params).promise()
@@ -73,14 +49,7 @@ function retrieve(deviceId, stopId) {
     });
 }
 
-function remove(deviceId, stopId) {
-  const params = {
-    TableName: tableName,
-    Key: {
-      "deviceId": deviceId,
-      "stopId": stopId
-    }
-  };
+function remove(params) {
   console.log(params);
 
   return docClient.delete(params).promise()
@@ -93,20 +62,7 @@ function remove(deviceId, stopId) {
     });
 }
 
-function update(deviceId, stopId, routeIds, lastUpdatedDateTime) {
-  const params = {
-    TableName: tableName,
-    Key: {
-      "deviceId": deviceId,
-      "stopId": stopId
-    },
-    UpdateExpression: "set routeIds = :r, lastUpdatedDateTime = :t",
-    ExpressionAttributeValues: {
-      ":r": routeIds,
-      ":t": lastUpdatedDateTime,
-    },
-    ReturnValues: "UPDATED_NEW"
-  };
+function update(params) {  
   console.log(params);
 
   return docClient.update(params).promise()
