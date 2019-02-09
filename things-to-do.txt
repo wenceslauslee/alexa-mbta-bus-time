@@ -1,0 +1,7 @@
+Create flow to store data into DynamoDB
+Add intents for adding stop and bus route
+Add top bus routes mapping to specific stop
+Fix card display
+
+
+rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTime --zip-file fileb://bus-time.zip
