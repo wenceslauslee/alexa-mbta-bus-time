@@ -93,16 +93,17 @@ function remove(deviceId, stopId) {
     });
 }
 
-function update(deviceId, stopId, routeIds) {
+function update(deviceId, stopId, routeIds, lastUpdatedDateTime) {
   const params = {
     TableName: tableName,
     Key: {
       "deviceId": deviceId,
       "stopId": stopId
     },
-    UpdateExpression: "set routeIds = :r",
+    UpdateExpression: "set routeIds = :r, lastUpdatedDateTime = :t",
     ExpressionAttributeValues: {
-      ":r": routeIds
+      ":r": routeIds,
+      ":t": lastUpdatedDateTime,
     },
     ReturnValues: "UPDATED_NEW"
   };

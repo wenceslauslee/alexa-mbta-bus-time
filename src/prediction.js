@@ -10,12 +10,11 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
 
     return q.all([predictionPromise, earliestSchedulePromise])
       .then((results) => {
-        if (!results[1]) {
-          return `There are no more scheduled trips for route ${routeId} today.`;
-        }
         if (results[0].length === 0) {
-          return `There are currently no predictions for route ${routeId}. `
-            + `The next scheduled trip is at ${formatToLocalTime(results[1])}.`;
+          if (!results[1]) {
+            return `There are no more scheduled trips for route ${routeId} today.`;
+          }
+          return `The next scheduled trip for route ${routeId} is at ${formatToLocalTime(results[1])}.`;
         }
 
         const formattedTimeArray = _.map(results[0], prediction => {

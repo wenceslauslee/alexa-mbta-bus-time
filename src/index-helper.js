@@ -35,10 +35,7 @@ function getSummary(handlerInput) {
 
   return callDirectiveService(handlerInput, initialSpeechOutput)
     .then(() => {      
-      if (_.isEmpty(sessionAttributes)) {
-        return dbInfo.query(deviceId);
-      }
-      return Promise.resolve(sessionAttributes);
+      return getSessionAttributes(handlerInput, deviceId);
     })
     .then(data => {
       if (!data) {
@@ -53,7 +50,19 @@ function getSummary(handlerInput) {
           .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
           .withShouldEndSession(false)
           .getResponse();
-      } else if (data.stopId && data.routeIds && data.routeIds.length != 0) {     
+      } else if (data.stopId && data.routeIds && data.routeIds.length === 0) {     
+        sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
+        attributes.setAttributes(handlerInput, sessionAttributes);
+        const speechOutput = `We could not find any routes related to your stop. `
+          + `What route number would you like to use?`;
+
+        return handlerInput.responseBuilder
+          .speak(speechOutput)
+          .reprompt(constants.REPROMPT_GET_SUMMARY)
+          .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+          .withShouldEndSession(false)
+          .getResponse();
+      } else if (data.stopId && data.routeIds && data.routeIds.length !== 0) {     
         attributes.setAttributes(handlerInput, data);   
         return prediction.getPredictions(
             data.routeIds, data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
@@ -83,15 +92,7 @@ function getRoute(handlerInput) {
 
   return callDirectiveService(handlerInput, initialSpeechOutput)
     .then(() => {
-      const sessionAttributes = attributes.getAttributes(handlerInput);
-      if (_.isEmpty(sessionAttributes)) {
-        return dbInfo.query(deviceId)
-          .then(data => {
-            attributes.setAttributes(handlerInput, data);
-            return data;
-          });
-      }
-      return Promise.resolve(sessionAttributes);
+      return getSessionAttributes(handlerInput, deviceId);
     })
     .then(data => {
       if (data) {
@@ -119,16 +120,7 @@ function addStop(handlerInput) {
   const speechOutput = `Adding stop ${stopId}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
-  return new Promise(() => {
-    if (_.isEmpty(sessionAttributes)) {
-      return dbInfo.query(deviceId)
-        .then(data => {
-          attributes.setAttributes(handlerInput, data);
-          return data;
-        });
-    }
-    return Promise.resolve(sessionAttributes);
-  })
+  return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
       sessionAttributes.stopId = stopId;
       sessionAttributes.routeIds = [];
@@ -158,7 +150,37 @@ function addRoute(handlerInput) {
   
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
+      if (sessionAttributes.routeIds.length === 3) {
+        sessionAttributes.routeIds = sessionAttributes.routeIds.splice(0, 1);
+      }
       sessionAttributes.routeIds.push(routeId);
+      return dbInfo.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
+        .then(() => sessionAttributes);
+    })
+    .then(sessionAttributes => {
+      attributes.setAttributes(handlerInput, sessionAttributes);
+
+      return handlerInput.responseBuilder
+        .speak(speechOutput)
+        .reprompt(constants.REPROMPT_ADD_ROUTE)
+        .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+        .withShouldEndSession(false)
+        .getResponse();
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
+}
+
+function deleteRoute(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+  const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
+  const speechOutput = `Deleting ${routeId} from saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  
+  return getSessionAttributes(handlerInput, deviceId)
+    .then(sessionAttributes => {
+      sessionAttributes.routeIds = _.without(sessionAttributes.routeIds, routeId);
       return dbInfo.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
         .then(() => sessionAttributes);
     })
@@ -181,8 +203,8 @@ function addRoute(handlerInput) {
 function handleNumberInput(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const number = handlerInput.requestEnvelope.request.intent.slots.Number.value;
-  const stopConfirmation = `Adding ${number} into saved stops. ${constants.FOLLOW_UP_ROUTE}`;
-  const routeConfirmation = `Adding ${number} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
+  const addStopConfirmation = `Adding ${number} into saved stops. ${constants.FOLLOW_UP_ROUTE}`;
+  const addRouteConfirmation = `Adding ${number} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
   const currentState = sessionAttributes['currentState'];
@@ -200,9 +222,9 @@ function handleNumberInput(handlerInput) {
     attributes.setAttributes(handlerInput, sessionAttributes);
 
     return handlerInput.responseBuilder
-      .speak(stopConfirmation)
+      .speak(addStopConfirmation)
       .reprompt(constants.REPROMPT_REPEAT)
-      .withSimpleCard(SKILL_NAME, stopConfirmation)
+      .withSimpleCard(SKILL_NAME, addStopConfirmation)
       .withShouldEndSession(false)
       .getResponse();
   } else if (currentState === constants.ADD_ROUTE_INTENT) {
@@ -217,9 +239,9 @@ function handleNumberInput(handlerInput) {
     return dbInfo.create(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
       .then(() => {
         return handlerInput.responseBuilder
-          .speak(routeConfirmation)
+          .speak(addRouteConfirmation)
           .reprompt(constants.REPROMPT_REPEAT)
-          .withSimpleCard(SKILL_NAME, routeConfirmation)
+          .withSimpleCard(SKILL_NAME, addRouteConfirmation)
           .withShouldEndSession(false)
           .getResponse();
         })
@@ -252,5 +274,6 @@ module.exports = {
   getRoute: getRoute,
   addStop: addStop,
   addRoute: addRoute,
+  deleteRoute: deleteRoute,
   handleNumberInput: handleNumberInput,
 };

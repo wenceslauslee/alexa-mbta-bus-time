@@ -9,5 +9,6 @@ module.exports = {
 	REPROMPT_REPEAT: 'I did not quite get that.  Can you repeat that again?',
 
 	ADD_ROUTE_INTENT: 'AddRouteIntent',
-	ADD_STOP_INTENT: 'SetStopIntent'
+	ADD_STOP_INTENT: 'AddStopIntent',
+	DELETE_ROUTE_INTENT: 'DeleteRouteIntent'
 };

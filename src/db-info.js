@@ -1,4 +1,5 @@
 const db = require('./db-api');
+const timeHelper = require('./time-helper');
 
 function create(deviceId, stopId, routeIds) {
   return db.create(deviceId, stopId, routeIds);
@@ -24,7 +25,8 @@ function remove(deviceId, stopId) {
 }
 
 function update(deviceId, stopId, routeIds) {
-  return db.update(deviceId, stopId, routeIds);
+  const lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
+  return db.update(deviceId, stopId, routeIds, lastUpdatedDateTime);
 }
 
 module.exports = {
