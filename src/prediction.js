@@ -12,9 +12,9 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
       .then((results) => {
         if (results[0].length === 0) {
           if (!results[1]) {
-            return `There are no more scheduled trips for route ${routeId} today.`;
+            return `There are no more scheduled trips for route ${digitize(routeId)} today.`;
           }
-          return `The next scheduled trip for route ${routeId} is at ${formatToLocalTime(results[1])}.`;
+          return `The next scheduled trip for route ${digitize(routeId)} is at ${formatToLocalTime(results[1])}.`;
         }
 
         const formattedTimeArray = _.map(results[0], prediction => {
@@ -23,10 +23,10 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
         const formattedTime = formattedTimeArray.join(' and ');
 
         if (formattedTimeArray.length === 1) {
-          return `The next predicted time for route ${routeId} is at ${formattedTime}.`
+          return `The next predicted time for route ${digitize(routeId)} is at ${formattedTime}.`
         }
 
-        return `The next predicted times for route ${routeId} are at ${formattedTime}.`
+        return `The next predicted times for route ${digitize(routeId)} are at ${formattedTime}.`
       });
 
   });
@@ -39,6 +39,10 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
 
 function formatToLocalTime(isoTime) {
   return moment(isoTime, 'YYYY-MM-DDTHH:mmZZ').tz('America/New_York').format('hh:mm A');
+}
+
+function digitize(number) {
+  return `<say-as interpret-as="digits">${number}</say-as>`;
 }
 
 module.exports = {

@@ -118,8 +118,8 @@ function getRoute(handlerInput) {
 function addStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
-  const speechOutput = `Adding stop ${stopId}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
-  const invalidStopSpeech = `Stop ${stopId} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+  const speechOutput = `Adding stop ${digitize(stopId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  const invalidStopSpeech = `Stop ${digitize(stopId)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
   return getSessionAttributes(handlerInput, deviceId)
@@ -160,7 +160,7 @@ function addStop(handlerInput) {
 function addRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
-  const speechOutput = `Adding route ${routeId} into saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  const speechOutput = `Adding route ${digitize(routeId)} into saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
   
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
@@ -190,7 +190,7 @@ function addRoute(handlerInput) {
 function deleteStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
-  const speechOutput = `Deleting stop ${stopId} from saved stops. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  const speechOutput = `Deleting stop ${digitize(stopId)} from saved stops. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
   
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
@@ -218,7 +218,7 @@ function deleteStop(handlerInput) {
 function deleteRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
-  const speechOutput = `Deleting route ${routeId} from saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  const speechOutput = `Deleting route ${digitize(routeId)} from saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
   
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
@@ -245,9 +245,9 @@ function deleteRoute(handlerInput) {
 function handleNumberInput(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const number = handlerInput.requestEnvelope.request.intent.slots.Number.value;
-  const addStopConfirmation = `Adding stop ${number} into saved stops. ${constants.FOLLOW_UP_ROUTE_PROMPT}`;
-  const addRouteConfirmation = `Adding route ${number} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
-  const invalidStopSpeech = `Stop ${number} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+  const addStopConfirmation = `Adding stop ${digitize(number)} into saved stops. ${constants.FOLLOW_UP_ROUTE_PROMPT}`;
+  const addRouteConfirmation = `Adding route ${digitize(number)} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
+  const invalidStopSpeech = `Stop ${digitize(number)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
   const currentState = sessionAttributes['currentState'];
@@ -321,6 +321,10 @@ function getSessionAttributes(handlerInput, deviceId) {
       });
   }
   return Promise.resolve(sessionAttributes);
+}
+
+function digitize(number) {
+  return `<say-as interpret-as="digits">${number}</say-as>`;
 }
 
 module.exports = {
