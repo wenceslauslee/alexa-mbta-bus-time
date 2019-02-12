@@ -7,6 +7,11 @@ function isStopIdValid(stopId) {
     });
 }
 
+function getStop(stopId) {
+	return mbta.getStop(stopId);
+}
+
 module.exports = {
-  isStopIdValid: isStopIdValid,
+	getStop: getStop,
+  isStopIdValid: isStopIdValid
 };

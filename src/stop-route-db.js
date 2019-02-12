@@ -5,14 +5,18 @@ const _ = require('underscore');
 
 const tableName = 'mbtabustime-stop-route';
 
-function create(deviceId, stopId, routeIds) {
-  const lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
+function create(deviceId, stopId, routeIds, stopName, lastUpdatedDateTime) {
+  if (!stopName) {
+    stopName = '---';
+  }
+
   const params = {
     TableName: tableName,
     Item: {
       "deviceId": deviceId,
       "stopId": stopId,
       "routeIds": routeIds,
+      "stopName": stopName,
       "lastUpdatedDateTime": lastUpdatedDateTime
     }
   };
@@ -23,7 +27,7 @@ function create(deviceId, stopId, routeIds) {
 function query(deviceId) {
   const params = {
     TableName : tableName,
-    ProjectionExpression:"stopId, routeIds",
+    ProjectionExpression:"deviceId, stopId, routeIds, stopName, lastUpdatedDateTime",
     KeyConditionExpression: "deviceId = :d",
     ExpressionAttributeValues: {
       ":d": deviceId
@@ -33,9 +37,15 @@ function query(deviceId) {
   return db.query(params)
   	.then(data => {
   	  if (data && data.length > 0) {
-        return _.max(data, d => moment(d).valueOf());
+        return {
+          recent: _.max(data, d => moment(d).valueOf()),
+          stops: data
+        };
   	  }
-  	  return null;
+  	  return {
+        recent: null,
+        stops: []
+      };
   	});
 }
 
@@ -63,17 +73,21 @@ function remove(deviceId, stopId) {
   return db.remove(params);
 }
 
-function update(deviceId, stopId, routeIds) {
-  const lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
+function update(deviceId, stopId, routeIds, stopName, lastUpdatedDateTime) {
+  if (!stopName) {
+    stopName = '---'
+  }
+
   const params = {
     TableName: tableName,
     Key: {
       "deviceId": deviceId,
       "stopId": stopId
     },
-    UpdateExpression: "set routeIds = :r, lastUpdatedDateTime = :t",
+    UpdateExpression: "set routeIds = :r, stopName= :s, lastUpdatedDateTime = :t",
     ExpressionAttributeValues: {
       ":r": routeIds,
+      ":s": stopName,
       ":t": lastUpdatedDateTime,
     },
     ReturnValues: "UPDATED_NEW"
@@ -82,10 +96,15 @@ function update(deviceId, stopId, routeIds) {
   return db.update(params);
 }
 
+function updateEntry(recent) {
+  return update(recent.deviceId, recent.stopId, recent.routeIds, recent.stopName, recent.lastUpdatedDateTime);
+}
+
 module.exports = {
   create: create,
   query: query,
   remove: remove,
   retrieve: retrieve,
-  update: update
+  update: update,
+  updateEntry: updateEntry
 };
