@@ -38,7 +38,7 @@ function query(deviceId) {
   	.then(data => {
   	  if (data && data.length > 0) {
         return {
-          recent: _.max(data, d => moment(d).valueOf()),
+          recent: _.max(data, d => moment(d.lastUpdatedDateTime).valueOf()),
           stops: data
         };
   	  }

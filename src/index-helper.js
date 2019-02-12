@@ -136,29 +136,36 @@ function getRoute(handlerInput) {
 function addStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
+  const nickname = handlerInput.requestEnvelope.request.intent.slots.Nickname.value;
   const speechOutput = `Adding stop ${digitize(stopId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
   const invalidStopSpeech = `Stop ${digitize(stopId)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
-      return mbtaInfo.isStopIdValid(stopId)
-        .then(valid => {
-          if (valid) {
-            sessionAttributes.stopId = stopId;
-            sessionAttributes.routeIds = [];
-            return stopRouteDb.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
-              .then(() => sessionAttributes)
-              .then(sessionAttributes => {
-                attributes.setAttributes(handlerInput, sessionAttributes);
+      return mbtaInfo.getStop(stopId)
+        .then(stops => {
+          if (stops.length > 0) {
+            const stop = stops[0];
+            const recent = {
+              deviceId: deviceId,
+              stopId: stop.id
+            };
+            if (nickname) {
+              recent.stopName = nickname;
+            }
+            sessionAttributes.recent = recent;
+            sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
+            attributes.setAttributes(handlerInput, sessionAttributes);
+            const addStopConfirmation = `Adding stop ${digitize(stopId)}, ${address(stop.attributes.name)}, `
+              + `into saved stops. ${constants.FOLLOW_UP_ROUTE_PROMPT}`;
 
-                return handlerInput.responseBuilder
-                  .speak(speechOutput)
-                  .reprompt(constants.REPROMPT_ADD_STOP)
-                  .withSimpleCard(SKILL_NAME, `${speechOutput}`)
-                  .withShouldEndSession(false)
-                  .getResponse();
-              });
+            return handlerInput.responseBuilder
+              .speak(addStopConfirmation)
+              .reprompt(constants.REPROMPT_REPEAT)
+              .withSimpleCard(SKILL_NAME, addStopConfirmation)
+              .withShouldEndSession(false)
+              .getResponse();
           } else {
             return handlerInput.responseBuilder
               .speak(invalidStopSpeech)
@@ -167,7 +174,7 @@ function addStop(handlerInput) {
               .withShouldEndSession(false)
               .getResponse();
           }
-        });      
+        });
     })    
     .catch(err => {
       console.log(err);
@@ -314,7 +321,7 @@ function handleNumberInput(handlerInput) {
     }
     recent.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
     sessionAttributes.currentState = null;
-    const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === data.stopId));
+    const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === recent.stopId));
     if (index === -1) {
       sessionAttributes.stops.push(recent);
     } else {
