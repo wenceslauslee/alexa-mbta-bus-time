@@ -38,6 +38,11 @@ function getSummary(handlerInput) {
       return getSessionAttributes(handlerInput, deviceId);
     })
     .then(sessionAttributes => {
+      if (handlerInput.requestEnvelope.request.intent 
+        && handlerInput.requestEnvelope.request.intent.slots.Nickname.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.Nickname.value.toLowerCase();
+        sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
       const data = sessionAttributes.recent;
       if (!data) {
         sessionAttributes.currentState = constants.ADD_STOP_INTENT;
@@ -152,7 +157,7 @@ function addStop(handlerInput) {
               stopId: stop.id
             };
             if (nickname) {
-              recent.stopName = nickname;
+              recent.stopName = nickname.toLowerCase();
             }
             sessionAttributes.recent = recent;
             sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
@@ -367,6 +372,17 @@ function digitize(number) {
 
 function address(string) {
   return `<say-as interpret-as="address">${string}</say-as>`;
+}
+
+function getSpecificLocation(sessionAttributes, nickname) {
+  if (sessionAttributes.recent.stopName === nickname) {
+    return sessionAttributes;
+  }
+  const index = _.findIndex(sessionAttributes.stops, s => (s.stopName === nickname));
+  if (index !== -1) {
+    sessionAttributes.recent = sessionAttributes.stops[index];
+  }
+  return sessionAttributes;
 }
 
 module.exports = {
