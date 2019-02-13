@@ -109,32 +109,45 @@ function getRoute(handlerInput) {
       return getSessionAttributes(handlerInput, deviceId);
     })
     .then(sessionAttributes => {
-      const data = sessionAttributes.recent;
-      if (data) {
-        data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
-        return stopRouteDb.updateEntry(data)
-          .then(() => {
-            const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === data.stopId));
-            sessionAttributes.stops[index] = data;
-            attributes.setAttributes(handlerInput, sessionAttributes);
-          })
-          .then(() => {
-            return prediction.getPredictions(
-              [routeId], data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
-          })        
-          .then((predictions) => {
-            const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
+      if (!sessionAttributes.recent) {
+        sessionAttributes.currentState = constants.ADD_STOP_INTENT;
+        attributes.setAttributes(handlerInput, sessionAttributes);
+        const speechOutput = `We could not find any data related to your device. `
+          + `What stop number would you like to use by default?`;
 
-            return handlerInput.responseBuilder
-              .speak(speechOutput)
-              .reprompt(constants.REPROMPT_GET_ROUTE)
-              .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
-              .withShouldEndSession(false)
-              .getResponse();
-          });
-      } else {
-        // Prompt user to register stop and route
+        return handlerInput.responseBuilder
+          .speak(speechOutput)
+          .reprompt(constants.REPROMPT_GET_SUMMARY)
+          .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+          .withShouldEndSession(false)
+          .getResponse();
       }
+      if (handlerInput.requestEnvelope.request.intent.slots.Nickname.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.Nickname.value.toLowerCase();
+        sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
+      const data = sessionAttributes.recent;
+      data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
+      return stopRouteDb.updateEntry(data)
+        .then(() => {
+          const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === data.stopId));
+          sessionAttributes.stops[index] = data;
+          attributes.setAttributes(handlerInput, sessionAttributes);
+        })
+        .then(() => {
+          return prediction.getPredictions(
+            [routeId], data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
+        })        
+        .then((predictions) => {
+          const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
+
+          return handlerInput.responseBuilder
+            .speak(speechOutput)
+            .reprompt(constants.REPROMPT_GET_ROUTE)
+            .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+            .withShouldEndSession(false)
+            .getResponse();
+        });
     });  
 }
 
