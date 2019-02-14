@@ -39,8 +39,15 @@ function getSummary(handlerInput) {
     })
     .then(sessionAttributes => {
       if (handlerInput.requestEnvelope.request.intent 
-        && handlerInput.requestEnvelope.request.intent.slots.Nickname.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.Nickname.value.toLowerCase();
+        && handlerInput.requestEnvelope.request.intent.slots.City.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
+        console.log(`Using city nickname ${nickname} for stop.`);
+        sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
+      if (handlerInput.requestEnvelope.request.intent 
+        && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
+        console.log(`Using street nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
       const data = sessionAttributes.recent;
@@ -122,8 +129,14 @@ function getRoute(handlerInput) {
           .withShouldEndSession(false)
           .getResponse();
       }
-      if (handlerInput.requestEnvelope.request.intent.slots.Nickname.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.Nickname.value.toLowerCase();
+      if (handlerInput.requestEnvelope.request.intent.slots.City.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
+        console.log(`Using city nickname ${nickname} for stop.`);
+        sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
+      if (handlerInput.requestEnvelope.request.intent.slots.Street.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
+        console.log(`Using street nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
       const data = sessionAttributes.recent;
@@ -154,7 +167,6 @@ function getRoute(handlerInput) {
 function addStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
-  const nickname = handlerInput.requestEnvelope.request.intent.slots.Nickname.value;
   const speechOutput = `Adding stop ${digitize(stopId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
   const invalidStopSpeech = `Stop ${digitize(stopId)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
 
@@ -169,8 +181,15 @@ function addStop(handlerInput) {
               deviceId: deviceId,
               stopId: stop.id
             };
-            if (nickname) {
-              recent.stopName = nickname.toLowerCase();
+            if (handlerInput.requestEnvelope.request.intent.slots.City.value) {
+              const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
+              console.log(`Using city nickname ${nickname} for stop.`);
+              recent.stopName = nickname;
+            }
+            if (handlerInput.requestEnvelope.request.intent.slots.Street.value) {
+              const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
+              console.log(`Using street nickname ${nickname} for stop.`);
+              recent.stopName = nickname;
             }
             sessionAttributes.recent = recent;
             sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
@@ -207,16 +226,22 @@ function addRoute(handlerInput) {
   
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
-      if (sessionAttributes.routeIds.length === 3) {
-        sessionAttributes.routeIds = sessionAttributes.routeIds.splice(0, 1);
+      const data = sessionAttributes.recent;
+      data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
+      if (data.routeIds.length === 3) {
+        data.routeIds = data.routeIds.splice(0, 1);
       }
-      sessionAttributes.routeIds.push(routeId);
-      return stopRouteDb.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
-        .then(() => sessionAttributes);
-    })
-    .then(sessionAttributes => {
+      data.routeIds.push(routeId);
+      const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === data.stopId));
+      sessionAttributes.stops[index] = data;
       attributes.setAttributes(handlerInput, sessionAttributes);
 
+      return data;
+    })
+    .then(data => {
+      return stopRouteDb.updateEntry(data);
+    })
+    .then(() => {
       return handlerInput.responseBuilder
         .speak(speechOutput)
         .reprompt(constants.REPROMPT_ADD_ROUTE)
