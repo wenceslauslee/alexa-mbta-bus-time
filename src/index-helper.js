@@ -39,12 +39,14 @@ function getSummary(handlerInput) {
     })
     .then(sessionAttributes => {
       if (handlerInput.requestEnvelope.request.intent 
+        && handlerInput.requestEnvelope.request.intent.slots.City
         && handlerInput.requestEnvelope.request.intent.slots.City.value) {
         const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
         console.log(`Using city nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
       if (handlerInput.requestEnvelope.request.intent 
+        && handlerInput.requestEnvelope.request.intent.slots.Street
         && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
         const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
         console.log(`Using street nickname ${nickname} for stop.`);
@@ -129,12 +131,14 @@ function getRoute(handlerInput) {
           .withShouldEndSession(false)
           .getResponse();
       }
-      if (handlerInput.requestEnvelope.request.intent.slots.City.value) {
+      if (handlerInput.requestEnvelope.request.intent.slots.City
+        && handlerInput.requestEnvelope.request.intent.slots.City.value) {
         const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
         console.log(`Using city nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
-      if (handlerInput.requestEnvelope.request.intent.slots.Street.value) {
+      if (handlerInput.requestEnvelope.request.intent.slots.Street
+        && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
         const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
         console.log(`Using street nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
@@ -181,12 +185,14 @@ function addStop(handlerInput) {
               deviceId: deviceId,
               stopId: stop.id
             };
-            if (handlerInput.requestEnvelope.request.intent.slots.City.value) {
+            if (handlerInput.requestEnvelope.request.intent.slots.City
+              && handlerInput.requestEnvelope.request.intent.slots.City.value) {
               const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
               console.log(`Using city nickname ${nickname} for stop.`);
               recent.stopName = nickname;
             }
-            if (handlerInput.requestEnvelope.request.intent.slots.Street.value) {
+            if (handlerInput.requestEnvelope.request.intent.slots.Street
+              && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
               const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
               console.log(`Using street nickname ${nickname} for stop.`);
               recent.stopName = nickname;

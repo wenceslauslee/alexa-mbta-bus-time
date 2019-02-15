@@ -19,7 +19,17 @@ const LaunchRequestHandler = {
 const GetRouteIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'GetRouteIntent';
+      && handlerInput.requestEnvelope.request.intent.name === constants.GET_ROUTE_INTENT;
+  },
+  handle(handlerInput) {
+    return indexHelper.getRoute(handlerInput);
+  },
+};
+
+const GetRouteIntentStreetHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === constants.GET_ROUTE_INTENT_STREET;
   },
   handle(handlerInput) {
     return indexHelper.getRoute(handlerInput);
@@ -29,7 +39,17 @@ const GetRouteIntentHandler = {
 const GetSummaryIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'GetSummaryIntent';
+      && handlerInput.requestEnvelope.request.intent.name === constants.GET_SUMMARY_INTENT;
+  },
+  handle(handlerInput) {
+    return indexHelper.getSummary(handlerInput);
+  },
+};
+
+const GetSummaryIntentStreetHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === constants.GET_SUMMARY_INTENT_STREET;
   },
   handle(handlerInput) {
     return indexHelper.getSummary(handlerInput);
@@ -40,6 +60,16 @@ const AddStopIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
       && handlerInput.requestEnvelope.request.intent.name === constants.ADD_STOP_INTENT;
+  },
+  handle(handlerInput) {
+    return indexHelper.addStop(handlerInput);
+  },
+};
+
+const AddStopIntentStreetHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === constants.ADD_STOP_INTENT_STREET;
   },
   handle(handlerInput) {
     return indexHelper.addStop(handlerInput);
@@ -173,8 +203,11 @@ exports.handler = skillBuilder
   .addRequestHandlers(
     LaunchRequestHandler,
     GetRouteIntentHandler,
+    GetRouteIntentStreetHandler,
     GetSummaryIntentHandler,
+    GetSummaryIntentStreetHandler,
     AddStopIntentHandler,
+    AddStopIntentStreetHandler,
     AddRouteIntentHandler,
     DeleteStopIntentHandler,
     DeleteRouteIntentHandler,

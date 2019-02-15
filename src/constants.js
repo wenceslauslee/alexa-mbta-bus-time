@@ -9,8 +9,13 @@ module.exports = {
 	REPROMPT_REPEAT: 'I did not quite get that.  Can you repeat that again?',
 	TRY_AGAIN_PROMPT: 'Please try again.',
 
+	GET_ROUTE_INTENT: 'GetRouteIntent',
+	GET_ROUTE_INTENT_STREET: 'GetRouteIntentStreet',
+	GET_SUMMARY_INTENT: 'GetSummaryIntent',
+	GET_SUMMARY_INTENT_STREET: 'GetSummaryIntentStreet',
 	ADD_ROUTE_INTENT: 'AddRouteIntent',
 	ADD_STOP_INTENT: 'AddStopIntent',
+	ADD_STOP_INTENT_STREET: 'AddStopIntentStreet',
 	DELETE_ROUTE_INTENT: 'DeleteRouteIntent',
 	DELETE_STOP_INTENT: 'DeleteStopIntent'
 };
