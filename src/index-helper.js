@@ -232,20 +232,31 @@ function addRoute(handlerInput) {
   
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
+      if (handlerInput.requestEnvelope.request.intent.slots.City
+        && handlerInput.requestEnvelope.request.intent.slots.City.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
+        console.log(`Using city nickname ${nickname} for stop.`);
+        sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
+      if (handlerInput.requestEnvelope.request.intent.slots.Street
+        && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
+        const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
+        console.log(`Using street nickname ${nickname} for stop.`);
+        sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
       const data = sessionAttributes.recent;
       data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
       if (data.routeIds.length === 3) {
-        data.routeIds = data.routeIds.splice(0, 1);
+        data.routeIds.splice(0, 1);
       }
       data.routeIds.push(routeId);
       const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === data.stopId));
       sessionAttributes.stops[index] = data;
-      attributes.setAttributes(handlerInput, sessionAttributes);
 
-      return data;
-    })
-    .then(data => {
-      return stopRouteDb.updateEntry(data);
+      return stopRouteDb.updateEntry(data)
+        .then(() => {
+          attributes.setAttributes(handlerInput, sessionAttributes);
+        });
     })
     .then(() => {
       return handlerInput.responseBuilder

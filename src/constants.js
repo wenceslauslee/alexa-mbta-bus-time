@@ -14,6 +14,7 @@ module.exports = {
 	GET_SUMMARY_INTENT: 'GetSummaryIntent',
 	GET_SUMMARY_INTENT_STREET: 'GetSummaryIntentStreet',
 	ADD_ROUTE_INTENT: 'AddRouteIntent',
+	ADD_ROUTE_INTENT_STREET: 'AddRouteIntentStreet',
 	ADD_STOP_INTENT: 'AddStopIntent',
 	ADD_STOP_INTENT_STREET: 'AddStopIntentStreet',
 	DELETE_ROUTE_INTENT: 'DeleteRouteIntent',
