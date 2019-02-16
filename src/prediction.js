@@ -17,9 +17,12 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
           return `The next scheduled trip for route ${digitize(routeId)} is at ${formatToLocalTime(results[1])}.`;
         }
 
-        const formattedTimeArray = _.map(results[0], prediction => {
+        var formattedTimeArray = _.map(results[0], prediction => {
           return formatToLocalTime(prediction);
         });
+        if (formattedTimeArray.length > 3) {
+          formattedTimeArray = formattedTimeArray.slice(0, 3);
+        }
         const formattedTime = formattedTimeArray.join(' and ');
 
         if (formattedTimeArray.length === 1) {

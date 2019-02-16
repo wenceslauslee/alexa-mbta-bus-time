@@ -1,6 +1,7 @@
 const attributes = require('./attributes');
 const constants = require('./constants');
 const mbtaInfo = require('./mbta-info');
+const moment = require('moment-timezone');
 const prediction = require('./prediction');
 const stopRouteDb = require('./stop-route-db');
 const timeHelper = require('./time-helper');
@@ -34,18 +35,18 @@ function getSummary(handlerInput) {
   const initialSpeechOutput = `The current time is ${timeAttributes.currentTimeSpeech}.`;
 
   return callDirectiveService(handlerInput, initialSpeechOutput)
-    .then(() => {      
+    .then(() => {
       return getSessionAttributes(handlerInput, deviceId);
     })
     .then(sessionAttributes => {
-      if (handlerInput.requestEnvelope.request.intent 
+      if (handlerInput.requestEnvelope.request.intent
         && handlerInput.requestEnvelope.request.intent.slots.City
         && handlerInput.requestEnvelope.request.intent.slots.City.value) {
         const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
         console.log(`Using city nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
-      if (handlerInput.requestEnvelope.request.intent 
+      if (handlerInput.requestEnvelope.request.intent
         && handlerInput.requestEnvelope.request.intent.slots.Street
         && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
         const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
@@ -65,7 +66,7 @@ function getSummary(handlerInput) {
           .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
           .withShouldEndSession(false)
           .getResponse();
-      } else if (data.stopId && data.routeIds && data.routeIds.length === 0) {     
+      } else if (data.stopId && data.routeIds && data.routeIds.length === 0) {
         sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
         attributes.setAttributes(handlerInput, sessionAttributes);
         const speechOutput = `We could not find any routes related to your stop. `
@@ -88,7 +89,7 @@ function getSummary(handlerInput) {
           .then(() => {
             return prediction.getPredictions(
               data.routeIds, data.stopId, timeAttributes.currentDate, timeAttributes.currentTime);
-          })        
+          })
           .then((predictions) => {
             const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
 
@@ -154,7 +155,7 @@ function getRoute(handlerInput) {
         .then(() => {
           return prediction.getPredictions(
             [routeId], data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
-        })        
+        })
         .then((predictions) => {
           const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
 
@@ -165,7 +166,7 @@ function getRoute(handlerInput) {
             .withShouldEndSession(false)
             .getResponse();
         });
-    });  
+    });
 }
 
 function addStop(handlerInput) {
@@ -183,7 +184,8 @@ function addStop(handlerInput) {
             const stop = stops[0];
             const recent = {
               deviceId: deviceId,
-              stopId: stop.id
+              stopId: stop.id,
+              routeIds: []
             };
             if (handlerInput.requestEnvelope.request.intent.slots.City
               && handlerInput.requestEnvelope.request.intent.slots.City.value) {
@@ -218,7 +220,7 @@ function addStop(handlerInput) {
               .getResponse();
           }
         });
-    })    
+    })
     .catch(err => {
       console.log(err);
       throw err;
@@ -229,7 +231,7 @@ function addRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
   const speechOutput = `Adding route ${digitize(routeId)} into saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
-  
+
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
       if (handlerInput.requestEnvelope.request.intent.slots.City
@@ -274,25 +276,44 @@ function addRoute(handlerInput) {
 
 function deleteStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
-  const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
-  const speechOutput = `Deleting stop ${digitize(stopId)} from saved stops. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
-  
+  const invalidOperationSpeech = `There are no stops related to your device. ${constants.TRY_AGAIN_PROMPT}`;
+
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
-      return stopRouteDb.remove(deviceId, sessionAttributes.stopId)
-        .then(() => sessionAttributes);
-    })
-    .then(sessionAttributes => {
-      if (sessionAttributes.stopId === stopId) {
-        attributes.clearAttributes(handlerInput);
-      }      
+      if (sessionAttributes.recent === null) {
+        return handlerInput.responseBuilder
+          .speak(invalidOperationSpeech)
+          .reprompt(constants.REPROMPT_REPEAT)
+          .withSimpleCard(SKILL_NAME, invalidOperationSpeech)
+          .withShouldEndSession(false)
+          .getResponse();
+      } else {
+        const stopId = sessionAttributes.recent.stopId;
+        const stopName = sessionAttributes.recent.stopName;
+        sessionAttributes = getNextRecentStop(sessionAttributes);
+        return stopRouteDb.remove(deviceId, stopId)
+          .then(() => {
+            if (sessionAttributes.recent) {
+              const data = sessionAttributes.recent;
+              data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
+              const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === data.stopId));
+              sessionAttributes.stops[index] = data;
 
-      return handlerInput.responseBuilder
-        .speak(speechOutput)
-        .reprompt(constants.REPROMPT_ADD_ROUTE)
-        .withSimpleCard(SKILL_NAME, `${speechOutput}`)
-        .withShouldEndSession(false)
-        .getResponse();
+              return stopRouteDb.updateEntry(data);
+            }
+          })
+          .then(() => {
+            attributes.setAttributes(handlerInput, sessionAttributes);
+            const speechOutput = `Deleting stop ${stopName} from saved stops. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+
+            return handlerInput.responseBuilder
+              .speak(speechOutput)
+              .reprompt(constants.REPROMPT_ADD_ROUTE)
+              .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+              .withShouldEndSession(false)
+              .getResponse();
+          });
+      }
     })
     .catch(err => {
       console.log(err);
@@ -304,7 +325,7 @@ function deleteRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
   const speechOutput = `Deleting route ${digitize(routeId)} from saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
-  
+
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
       sessionAttributes.routeIds = _.without(sessionAttributes.routeIds, routeId);
@@ -437,6 +458,20 @@ function getSpecificLocation(sessionAttributes, nickname) {
   if (index !== -1) {
     sessionAttributes.recent = sessionAttributes.stops[index];
   }
+  return sessionAttributes;
+}
+
+function getNextRecentStop(sessionAttributes) {
+  const stopId = sessionAttributes.recent.stopId;
+  const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === stopId));
+  sessionAttributes.stops.splice(index, 1);
+
+  if (sessionAttributes.stops.length === 0) {
+    sessionAttributes.recent = null;
+  } else {
+    sessionAttributes.recent = _.max(sessionAttributes.stops, d => moment(d.lastUpdatedDateTime).valueOf());
+  }
+
   return sessionAttributes;
 }
 
