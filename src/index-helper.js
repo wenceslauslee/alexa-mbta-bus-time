@@ -7,8 +7,6 @@ const stopRouteDb = require('./stop-route-db');
 const timeHelper = require('./time-helper');
 const _ = require('underscore');
 
-const SKILL_NAME = 'MBTA Bus Time';
-
 function callDirectiveService(handlerInput, speechOutput) {
   const requestEnvelope = handlerInput.requestEnvelope;
   const directiveServiceClient = handlerInput.serviceClientFactory.getDirectiveServiceClient();
@@ -63,7 +61,7 @@ function getSummary(handlerInput) {
         return handlerInput.responseBuilder
           .speak(speechOutput)
           .reprompt(constants.REPROMPT_GET_SUMMARY)
-          .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+          .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
           .withShouldEndSession(false)
           .getResponse();
       } else if (data.stopId && data.routeIds && data.routeIds.length === 0) {
@@ -75,7 +73,7 @@ function getSummary(handlerInput) {
         return handlerInput.responseBuilder
           .speak(speechOutput)
           .reprompt(constants.REPROMPT_GET_SUMMARY)
-          .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+          .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
           .withShouldEndSession(false)
           .getResponse();
       } else if (data.stopId && data.routeIds && data.routeIds.length !== 0) {
@@ -96,7 +94,7 @@ function getSummary(handlerInput) {
             return handlerInput.responseBuilder
               .speak(speechOutput)
               .reprompt(constants.REPROMPT_GET_SUMMARY)
-              .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+              .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
               .withShouldEndSession(false)
               .getResponse();
           });
@@ -128,7 +126,7 @@ function getRoute(handlerInput) {
         return handlerInput.responseBuilder
           .speak(speechOutput)
           .reprompt(constants.REPROMPT_GET_SUMMARY)
-          .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+          .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
           .withShouldEndSession(false)
           .getResponse();
       }
@@ -162,7 +160,7 @@ function getRoute(handlerInput) {
           return handlerInput.responseBuilder
             .speak(speechOutput)
             .reprompt(constants.REPROMPT_GET_ROUTE)
-            .withSimpleCard(SKILL_NAME, `${initialSpeechOutput} ${speechOutput}`)
+            .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
             .withShouldEndSession(false)
             .getResponse();
         });
@@ -208,14 +206,14 @@ function addStop(handlerInput) {
             return handlerInput.responseBuilder
               .speak(addStopConfirmation)
               .reprompt(constants.REPROMPT_REPEAT)
-              .withSimpleCard(SKILL_NAME, addStopConfirmation)
+              .withSimpleCard(constants.SKILL_NAME, formatForCard(addStopConfirmation))
               .withShouldEndSession(false)
               .getResponse();
           } else {
             return handlerInput.responseBuilder
               .speak(invalidStopSpeech)
               .reprompt(constants.REPROMPT_REPEAT)
-              .withSimpleCard(SKILL_NAME, invalidStopSpeech)
+              .withSimpleCard(constants.SKILL_NAME, formatForCard(invalidStopSpeech))
               .withShouldEndSession(false)
               .getResponse();
           }
@@ -264,7 +262,7 @@ function addRoute(handlerInput) {
       return handlerInput.responseBuilder
         .speak(speechOutput)
         .reprompt(constants.REPROMPT_ADD_ROUTE)
-        .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+        .withSimpleCard(constants.SKILL_NAME, formatForCard(speechOutput))
         .withShouldEndSession(false)
         .getResponse();
     })
@@ -284,7 +282,7 @@ function deleteStop(handlerInput) {
         return handlerInput.responseBuilder
           .speak(invalidOperationSpeech)
           .reprompt(constants.REPROMPT_REPEAT)
-          .withSimpleCard(SKILL_NAME, invalidOperationSpeech)
+          .withSimpleCard(constants.SKILL_NAME, formatForCard(invalidOperationSpeech))
           .withShouldEndSession(false)
           .getResponse();
       } else {
@@ -309,7 +307,7 @@ function deleteStop(handlerInput) {
             return handlerInput.responseBuilder
               .speak(speechOutput)
               .reprompt(constants.REPROMPT_ADD_ROUTE)
-              .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+              .withSimpleCard(constants.SKILL_NAME, formatForCard(speechOutput))
               .withShouldEndSession(false)
               .getResponse();
           });
@@ -332,7 +330,7 @@ function deleteRoute(handlerInput) {
         return handlerInput.responseBuilder
           .speak(noStopSpeech)
           .reprompt(constants.REPROMPT_REPEAT)
-          .withSimpleCard(SKILL_NAME, noStopSpeech)
+          .withSimpleCard(constants.SKILL_NAME, formatForCard(noStopSpeech))
           .withShouldEndSession(false)
           .getResponse();
       } else {
@@ -350,7 +348,7 @@ function deleteRoute(handlerInput) {
             return handlerInput.responseBuilder
               .speak(speechOutput)
               .reprompt(constants.REPROMPT_ADD_ROUTE)
-              .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+              .withSimpleCard(constants.SKILL_NAME, formatForCard(speechOutput))
               .withShouldEndSession(false)
               .getResponse();
           });
@@ -374,7 +372,7 @@ function handleNumberInput(handlerInput) {
     return handlerInput.responseBuilder
         .speak(constants.REPROMPT_GET_SUMMARY)
         .reprompt(constants.REPROMPT_GET_SUMMARY)
-        .withSimpleCard(SKILL_NAME, constants.REPROMPT_GET_SUMMARY)
+        .withSimpleCard(constants.SKILL_NAME, formatForCard(constants.REPROMPT_GET_SUMMARY))
         .withShouldEndSession(false)
         .getResponse();
   } else if (currentState === constants.ADD_STOP_INTENT) {
@@ -395,14 +393,14 @@ function handleNumberInput(handlerInput) {
           return handlerInput.responseBuilder
             .speak(addStopConfirmation)
             .reprompt(constants.REPROMPT_REPEAT)
-            .withSimpleCard(SKILL_NAME, addStopConfirmation)
+            .withSimpleCard(constants.SKILL_NAME, formatForCard(addStopConfirmation))
             .withShouldEndSession(false)
             .getResponse();
         } else {
           return handlerInput.responseBuilder
             .speak(invalidStopSpeech)
             .reprompt(constants.REPROMPT_REPEAT)
-            .withSimpleCard(SKILL_NAME, invalidStopSpeech)
+            .withSimpleCard(constants.SKILL_NAME, formatForCard(invalidStopSpeech))
             .withShouldEndSession(false)
             .getResponse();
         }
@@ -429,7 +427,7 @@ function handleNumberInput(handlerInput) {
         return handlerInput.responseBuilder
           .speak(addRouteConfirmation)
           .reprompt(constants.REPROMPT_REPEAT)
-          .withSimpleCard(SKILL_NAME, addRouteConfirmation)
+          .withSimpleCard(constants.SKILL_NAME, formatForCard(addRouteConfirmation))
           .withShouldEndSession(false)
           .getResponse();
         })
@@ -462,6 +460,11 @@ function digitize(number) {
 
 function address(string) {
   return `<say-as interpret-as="address">${string}</say-as>`;
+}
+
+function formatForCard(output) {
+  const expression = /(<([^>]+)>)/ig;
+  return output.replace(expression, '');
 }
 
 function getSpecificLocation(sessionAttributes, nickname) {

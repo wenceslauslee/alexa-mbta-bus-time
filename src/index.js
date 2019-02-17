@@ -134,6 +134,7 @@ const HelpIntentHandler = {
   handle(handlerInput) {
     return handlerInput.responseBuilder
       .speak(HELP_MESSAGE)
+      .withSimpleCard(constants.SKILL_NAME, HELP_MESSAGE)
       .reprompt(HELP_REPROMPT)
       .withShouldEndSession(false)
       .getResponse();
@@ -148,6 +149,7 @@ const CancelIntentHandler = {
   handle(handlerInput) {
     return handlerInput.responseBuilder
       .speak(STOP_MESSAGE)
+      .withSimpleCard(constants.SKILL_NAME, STOP_MESSAGE)
       .withShouldEndSession(true)
       .getResponse();
   },
@@ -161,6 +163,7 @@ const StopIntentHandler = {
   handle(handlerInput) {
     return handlerInput.responseBuilder
       .speak(STOP_MESSAGE)
+      .withSimpleCard(constants.SKILL_NAME, STOP_MESSAGE)
       .withShouldEndSession(true)
       .getResponse();
   }
@@ -173,7 +176,8 @@ const FallbackIntentHandler = {
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
-      .speak('Sorry, I do not understand. Please try again.')
+      .speak(constants.REPROMPT_TRY_AGAIN)
+      .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_TRY_AGAIN)
       .withShouldEndSession(false)
       .getResponse();
   },
@@ -188,6 +192,7 @@ const SessionEndedRequestHandler = {
 
     return handlerInput.responseBuilder
       .speak(STOP_MESSAGE)
+      .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_TRY_AGAIN)
       .withShouldEndSession(true)
       .getResponse();
   },

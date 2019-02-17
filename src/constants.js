@@ -1,4 +1,6 @@
 module.exports = {
+	SKILL_NAME: 'MBTA Bus Time',
+
 	FOLLOW_UP_PROMPT: 'Would you like to do anything else?',
 	FOLLOW_UP_PROMPT_SHORT: 'What else?',
 	FOLLOW_UP_ROUTE_PROMPT: 'What route would you like to add to this stop?',
@@ -7,6 +9,7 @@ module.exports = {
   REPROMPT_GET_ROUTE: 'I did not quite get that.  Would you like to ask for a specific route?',
 	REPROMPT_GET_SUMMARY: 'I did not quite get that.  Would you like to get a summary?',
 	REPROMPT_REPEAT: 'I did not quite get that.  Can you repeat that again?',
+	REPROMPT_TRY_AGAIN: 'I did not quite get that. Please try again.',
 	TRY_AGAIN_PROMPT: 'Please try again.',
 
 	GET_ROUTE_INTENT: 'GetRouteIntent',
