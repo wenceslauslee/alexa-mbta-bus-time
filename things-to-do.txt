@@ -1,5 +1,8 @@
-Create flow to store stop name into DynamoDB
+Consolidate times when possible
 Fix card display for digitized numbers
-
+Create flow to store stop name into DynamoDB
+	* Store unique names
+Create flow to store direction name into DynamoDB
+	* Guarantee uniqueness
 
 rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTime --zip-file fileb://bus-time.zip
