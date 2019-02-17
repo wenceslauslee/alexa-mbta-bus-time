@@ -324,23 +324,37 @@ function deleteStop(handlerInput) {
 function deleteRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
-  const speechOutput = `Deleting route ${digitize(routeId)} from saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  const noStopSpeech = `Deleting route ${digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
-      sessionAttributes.routeIds = _.without(sessionAttributes.routeIds, routeId);
-      return stopRouteDb.update(deviceId, sessionAttributes.stopId, sessionAttributes.routeIds)
-        .then(() => sessionAttributes);
-    })
-    .then(sessionAttributes => {
-      attributes.setAttributes(handlerInput, sessionAttributes);
+      if (sessionAttributes.recent === null) {
+        return handlerInput.responseBuilder
+          .speak(noStopSpeech)
+          .reprompt(constants.REPROMPT_REPEAT)
+          .withSimpleCard(SKILL_NAME, noStopSpeech)
+          .withShouldEndSession(false)
+          .getResponse();
+      } else {
+        const data = sessionAttributes.recent;
+        data.routeIds = _.without(data.routeIds, routeId);
+        data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
+        const index = _.findIndex(sessionAttributes.stops, s => (s.stopId === data.stopId));
+        sessionAttributes.stops[index] = data;
 
-      return handlerInput.responseBuilder
-        .speak(speechOutput)
-        .reprompt(constants.REPROMPT_ADD_ROUTE)
-        .withSimpleCard(SKILL_NAME, `${speechOutput}`)
-        .withShouldEndSession(false)
-        .getResponse();
+        return stopRouteDb.updateEntry(data)
+          .then(() => {
+            attributes.setAttributes(handlerInput, sessionAttributes);
+            const speechOutput = `Deleting route ${digitize(routeId)} from stop ${data.stopName}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+
+            return handlerInput.responseBuilder
+              .speak(speechOutput)
+              .reprompt(constants.REPROMPT_ADD_ROUTE)
+              .withSimpleCard(SKILL_NAME, `${speechOutput}`)
+              .withShouldEndSession(false)
+              .getResponse();
+          });
+      }
     })
     .catch(err => {
       console.log(err);

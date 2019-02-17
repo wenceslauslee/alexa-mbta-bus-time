@@ -1,6 +1,4 @@
-Create flow to store data into DynamoDB
-Add intents for adding stop and bus route
-Add top bus routes mapping to specific stop
+Create flow to store stop name into DynamoDB
 Fix card display for digitized numbers
 
 
