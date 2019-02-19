@@ -35,34 +35,58 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
 
   return q.all(routePredictions)
     .then(results => {
-      const routesWithTime = _.filter(results, r => r.predictions && r.scheduled);
+      const routesWithTime = _.filter(results, r => r.predictions || r.scheduled);
       const routesWithoutTime = _.filter(results, r => !r.predictions && !r.scheduled);
 
-      const routesWithTimeString = _.map(routesWithTime, r => formatResult(r)).join(' ');
-      const routesWithoutTimeString = formatResultsWithoutTime(routesWithoutTime);
+      const routesWithTimeSpeech = _.map(routesWithTime, r => formatResult(r).speech).join(' ');
+      const routesWithTimeDisplay = _.map(routesWithTime, r => formatResult(r).display).join('\n');
+      const routesWithoutTimeSpeech = formatResultsWithoutTime(routesWithoutTime).speech;
+      const routesWithoutTimeDisplay = formatResultsWithoutTime(routesWithoutTime).display;
 
-      if (routesWithTimeString === '') {
-        return routesWithoutTimeString;
-      } else if (routesWithoutTimeString === '') {
-        return routesWithTimeString;
+      if (routesWithTimeSpeech === '') {
+        return {
+          speech: routesWithoutTimeSpeech,
+          display: routesWithoutTimeDisplay
+        };
+      } else if (routesWithoutTimeSpeech === '') {
+        return {
+          speech: routesWithTimeSpeech,
+          display: routesWithTimeDisplay
+        };
       }
-      return routesWithTimeString + ' ' + routesWithoutTimeString;
+      return {
+        speech: routesWithTimeSpeech + ' ' + routesWithoutTimeSpeech,
+        display: routesWithTimeDisplay + '\n' + routesWithoutTimeDisplay
+      };
     });
 }
 
 function formatResult(result) {
   if (result.predictions) {
     if (result.predictions.length > 1) {
-      return `The next predicted times for route ${digitize(result.routeId)} are at ${concatenate(result.predictions)}.`;
+      return {
+        speech: `The next predicted times for route ${digitize(result.routeId)} are at ${concatenate(result.predictions)}.`,
+        display: `${result.routeId}: ${concatenate(result.predictions)}`
+      };
     }
-    return `The next predicted time for route ${digitize(result.routeId)} is at ${concatenate(result.predictions)}.`;
+    return {
+      speech: `The next predicted time for route ${digitize(result.routeId)} is at ${concatenate(result.predictions)}.`,
+      display: `${result.routeId}: ${concatenate(result.predictions)}`
+    };
   }
-  return `The next scheduled trip for route ${digitize(result.routeId)} is at ${result.scheduled}.`;
+  return {
+    speech: `The next scheduled trip for route ${digitize(result.routeId)} is at ${result.scheduled}.`,
+    display: `${result.routeId}: ${result.scheduled}`
+  };
 }
 
 function formatResultsWithoutTime(results) {
   const routeIds = concatenate(_.map(results, r => digitize(r.routeId)));
-  return `There are no more scheduled trips for route ${routeIds} today.`;
+
+  return {
+    speech: `There are no more scheduled trips for route ${routeIds} today.`,
+    display: _.map(results, r => `${r.routeId}: None`).join('\n')
+  };
 }
 
 function formatToLocalTime(isoTime) {

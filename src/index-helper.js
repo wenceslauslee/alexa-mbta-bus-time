@@ -55,25 +55,25 @@ function getSummary(handlerInput) {
       if (!data) {
         sessionAttributes.currentState = constants.ADD_STOP_INTENT;
         attributes.setAttributes(handlerInput, sessionAttributes);
-        const speechOutput = `We could not find any data related to your device. `
-          + `What stop number would you like to use by default?`;
+        const whichStopOutput = `What stop number would you like to use by default?`;
+        const speechOutput = `We could not find any data related to your device. ${whichStopOutput}`;
 
         return handlerInput.responseBuilder
           .speak(speechOutput)
           .reprompt(constants.REPROMPT_GET_SUMMARY)
-          .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
+          .withSimpleCard(constants.SKILL_NAME, whichStopOutput)
           .withShouldEndSession(false)
           .getResponse();
       } else if (data.stopId && data.routeIds && data.routeIds.length === 0) {
         sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
         attributes.setAttributes(handlerInput, sessionAttributes);
-        const speechOutput = `We could not find any routes related to your stop. `
-          + `What route number would you like to use?`;
+        const whichRouteOutput = `What route number would you like to use?`;
+        const speechOutput = `We could not find any routes related to your stop. ${whichRouteOutput}`;
 
         return handlerInput.responseBuilder
           .speak(speechOutput)
           .reprompt(constants.REPROMPT_GET_SUMMARY)
-          .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
+          .withSimpleCard(constants.SKILL_NAME, whichRouteOutput)
           .withShouldEndSession(false)
           .getResponse();
       } else if (data.stopId && data.routeIds && data.routeIds.length !== 0) {
@@ -89,12 +89,12 @@ function getSummary(handlerInput) {
               data.routeIds, data.stopId, timeAttributes.currentDate, timeAttributes.currentTime);
           })
           .then((predictions) => {
-            const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
+            const speechOutput = `${predictions.speech} ${constants.FOLLOW_UP_PROMPT}`;
 
             return handlerInput.responseBuilder
               .speak(speechOutput)
               .reprompt(constants.REPROMPT_GET_SUMMARY)
-              .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
+              .withSimpleCard(constants.SKILL_NAME, predictions.display)
               .withShouldEndSession(false)
               .getResponse();
           });
