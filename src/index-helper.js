@@ -120,13 +120,13 @@ function getRoute(handlerInput) {
       if (!sessionAttributes.recent) {
         sessionAttributes.currentState = constants.ADD_STOP_INTENT;
         attributes.setAttributes(handlerInput, sessionAttributes);
-        const speechOutput = `We could not find any data related to your device. `
-          + `What stop number would you like to use by default?`;
+        const whichStopOutput = `What stop number would you like to use by default?`;
+        const speechOutput = `We could not find any data related to your device. ${whichStopOutput}`;
 
         return handlerInput.responseBuilder
           .speak(speechOutput)
           .reprompt(constants.REPROMPT_GET_SUMMARY)
-          .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
+          .withSimpleCard(constants.SKILL_NAME, whichStopOutput)
           .withShouldEndSession(false)
           .getResponse();
       }
@@ -155,12 +155,12 @@ function getRoute(handlerInput) {
             [routeId], data.stopId, timeAttributes.currentDate, timeAttributes.currentTime)
         })
         .then((predictions) => {
-          const speechOutput = `${predictions} ${constants.FOLLOW_UP_PROMPT}`;
+          const speechOutput = `${predictions.speech} ${constants.FOLLOW_UP_PROMPT}`;
 
           return handlerInput.responseBuilder
             .speak(speechOutput)
             .reprompt(constants.REPROMPT_GET_ROUTE)
-            .withSimpleCard(constants.SKILL_NAME, formatForCard(`${initialSpeechOutput} ${speechOutput}`))
+            .withSimpleCard(constants.SKILL_NAME, predictions.display)
             .withShouldEndSession(false)
             .getResponse();
         });
@@ -171,6 +171,7 @@ function addStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const stopId = handlerInput.requestEnvelope.request.intent.slots.Stop.value;
   const speechOutput = `Adding stop ${digitize(stopId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+  const invalidStopDisplay = `Stop ${stopId} invalid.`;
   const invalidStopSpeech = `Stop ${digitize(stopId)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
@@ -200,20 +201,21 @@ function addStop(handlerInput) {
             sessionAttributes.recent = recent;
             sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
             attributes.setAttributes(handlerInput, sessionAttributes);
+            const addStopDisplay = `Stop (${stopId}) ${stop.attributes.name} added.`;
             const addStopConfirmation = `Adding stop ${digitize(stopId)}, ${address(stop.attributes.name)}, `
               + `into saved stops. ${constants.FOLLOW_UP_ROUTE_PROMPT}`;
 
             return handlerInput.responseBuilder
               .speak(addStopConfirmation)
               .reprompt(constants.REPROMPT_REPEAT)
-              .withSimpleCard(constants.SKILL_NAME, formatForCard(addStopConfirmation))
+              .withSimpleCard(constants.SKILL_NAME, addStopDisplay)
               .withShouldEndSession(false)
               .getResponse();
           } else {
             return handlerInput.responseBuilder
               .speak(invalidStopSpeech)
               .reprompt(constants.REPROMPT_REPEAT)
-              .withSimpleCard(constants.SKILL_NAME, formatForCard(invalidStopSpeech))
+              .withSimpleCard(constants.SKILL_NAME, invalidStopDisplay)
               .withShouldEndSession(false)
               .getResponse();
           }
@@ -228,6 +230,7 @@ function addStop(handlerInput) {
 function addRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
+  const displayOutput = `Route ${routeId} added.`;
   const speechOutput = `Adding route ${digitize(routeId)} into saved routes. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
   return getSessionAttributes(handlerInput, deviceId)
@@ -262,7 +265,7 @@ function addRoute(handlerInput) {
       return handlerInput.responseBuilder
         .speak(speechOutput)
         .reprompt(constants.REPROMPT_ADD_ROUTE)
-        .withSimpleCard(constants.SKILL_NAME, formatForCard(speechOutput))
+        .withSimpleCard(constants.SKILL_NAME, displayOutput)
         .withShouldEndSession(false)
         .getResponse();
     })
@@ -274,6 +277,7 @@ function addRoute(handlerInput) {
 
 function deleteStop(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+  const invalidOperationDisplay = `No stops found.`;
   const invalidOperationSpeech = `There are no stops related to your device. ${constants.TRY_AGAIN_PROMPT}`;
 
   return getSessionAttributes(handlerInput, deviceId)
@@ -282,7 +286,7 @@ function deleteStop(handlerInput) {
         return handlerInput.responseBuilder
           .speak(invalidOperationSpeech)
           .reprompt(constants.REPROMPT_REPEAT)
-          .withSimpleCard(constants.SKILL_NAME, formatForCard(invalidOperationSpeech))
+          .withSimpleCard(constants.SKILL_NAME, invalidOperationDisplay)
           .withShouldEndSession(false)
           .getResponse();
       } else {
@@ -302,12 +306,13 @@ function deleteStop(handlerInput) {
           })
           .then(() => {
             attributes.setAttributes(handlerInput, sessionAttributes);
+            const displayOutput = `Stop (${stopId}) ${stopName} deleted.`;
             const speechOutput = `Deleting stop ${stopName} from saved stops. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
             return handlerInput.responseBuilder
               .speak(speechOutput)
               .reprompt(constants.REPROMPT_ADD_ROUTE)
-              .withSimpleCard(constants.SKILL_NAME, formatForCard(speechOutput))
+              .withSimpleCard(constants.SKILL_NAME, displayOutput)
               .withShouldEndSession(false)
               .getResponse();
           });
@@ -322,6 +327,7 @@ function deleteStop(handlerInput) {
 function deleteRoute(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const routeId = handlerInput.requestEnvelope.request.intent.slots.Route.value;
+  const noStopDisplay = `No stops found.`;
   const noStopSpeech = `Deleting route ${digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
   return getSessionAttributes(handlerInput, deviceId)
@@ -330,7 +336,7 @@ function deleteRoute(handlerInput) {
         return handlerInput.responseBuilder
           .speak(noStopSpeech)
           .reprompt(constants.REPROMPT_REPEAT)
-          .withSimpleCard(constants.SKILL_NAME, formatForCard(noStopSpeech))
+          .withSimpleCard(constants.SKILL_NAME, noStopDisplay)
           .withShouldEndSession(false)
           .getResponse();
       } else {
@@ -343,12 +349,13 @@ function deleteRoute(handlerInput) {
         return stopRouteDb.updateEntry(data)
           .then(() => {
             attributes.setAttributes(handlerInput, sessionAttributes);
+            const displayOutput = `Route ${routeId} deleted.`;
             const speechOutput = `Deleting route ${digitize(routeId)} from stop ${data.stopName}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
             return handlerInput.responseBuilder
               .speak(speechOutput)
               .reprompt(constants.REPROMPT_ADD_ROUTE)
-              .withSimpleCard(constants.SKILL_NAME, formatForCard(speechOutput))
+              .withSimpleCard(constants.SKILL_NAME, displayOutput)
               .withShouldEndSession(false)
               .getResponse();
           });
@@ -364,7 +371,9 @@ function handleNumberInput(handlerInput) {
   const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
   const number = handlerInput.requestEnvelope.request.intent.slots.Number.value;
   const addRouteConfirmation = `Adding route ${digitize(number)} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
+  const addRouteDisplay = `Route ${number} added.`;
   const invalidStopSpeech = `Stop ${digitize(number)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+  const invalidStopDisplay = `Stop ${number} invalid.`;
 
   const sessionAttributes = attributes.getAttributes(handlerInput);
   const currentState = sessionAttributes['currentState'];
@@ -372,7 +381,7 @@ function handleNumberInput(handlerInput) {
     return handlerInput.responseBuilder
         .speak(constants.REPROMPT_GET_SUMMARY)
         .reprompt(constants.REPROMPT_GET_SUMMARY)
-        .withSimpleCard(constants.SKILL_NAME, formatForCard(constants.REPROMPT_GET_SUMMARY))
+        .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_GET_SUMMARY)
         .withShouldEndSession(false)
         .getResponse();
   } else if (currentState === constants.ADD_STOP_INTENT) {
@@ -387,20 +396,21 @@ function handleNumberInput(handlerInput) {
           sessionAttributes.recent = recent;
           sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
           attributes.setAttributes(handlerInput, sessionAttributes);
+          const addStopDisplay = `Stop (${stopId}) ${stop.attributes.name} added.`;
           const addStopConfirmation = `Adding stop ${digitize(number)}, ${address(stop.attributes.name)}, `
             + `into saved stops. ${constants.FOLLOW_UP_ROUTE_PROMPT}`;
 
           return handlerInput.responseBuilder
             .speak(addStopConfirmation)
             .reprompt(constants.REPROMPT_REPEAT)
-            .withSimpleCard(constants.SKILL_NAME, formatForCard(addStopConfirmation))
+            .withSimpleCard(constants.SKILL_NAME, addStopDisplay)
             .withShouldEndSession(false)
             .getResponse();
         } else {
           return handlerInput.responseBuilder
             .speak(invalidStopSpeech)
             .reprompt(constants.REPROMPT_REPEAT)
-            .withSimpleCard(constants.SKILL_NAME, formatForCard(invalidStopSpeech))
+            .withSimpleCard(constants.SKILL_NAME, invalidStopDisplay)
             .withShouldEndSession(false)
             .getResponse();
         }
@@ -427,7 +437,7 @@ function handleNumberInput(handlerInput) {
         return handlerInput.responseBuilder
           .speak(addRouteConfirmation)
           .reprompt(constants.REPROMPT_REPEAT)
-          .withSimpleCard(constants.SKILL_NAME, formatForCard(addRouteConfirmation))
+          .withSimpleCard(constants.SKILL_NAME, addRouteDisplay)
           .withShouldEndSession(false)
           .getResponse();
         })
@@ -460,11 +470,6 @@ function digitize(number) {
 
 function address(string) {
   return `<say-as interpret-as="address">${string}</say-as>`;
-}
-
-function formatForCard(output) {
-  const expression = /(<([^>]+)>)/ig;
-  return output.replace(expression, '');
 }
 
 function getSpecificLocation(sessionAttributes, nickname) {

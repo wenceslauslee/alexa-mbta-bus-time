@@ -43,12 +43,12 @@ function getPredictions(routeIds, stopId, currentDate, currentTime) {
       const routesWithoutTimeSpeech = formatResultsWithoutTime(routesWithoutTime).speech;
       const routesWithoutTimeDisplay = formatResultsWithoutTime(routesWithoutTime).display;
 
-      if (routesWithTimeSpeech === '') {
+      if (routesWithTime.length === 0) {
         return {
           speech: routesWithoutTimeSpeech,
           display: routesWithoutTimeDisplay
         };
-      } else if (routesWithoutTimeSpeech === '') {
+      } else if (routesWithoutTime.length === 0) {
         return {
           speech: routesWithTimeSpeech,
           display: routesWithTimeDisplay
