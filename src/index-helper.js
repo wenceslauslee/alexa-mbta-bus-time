@@ -1,5 +1,6 @@
 const attributes = require('./attributes');
 const constants = require('./constants');
+const levenshtein = require('./levenshtein');
 const mbtaInfo = require('./mbta-info');
 const moment = require('moment-timezone');
 const prediction = require('./prediction');
@@ -37,19 +38,30 @@ function getSummary(handlerInput) {
       return getSessionAttributes(handlerInput, deviceId);
     })
     .then(sessionAttributes => {
+      var nickname;
       if (handlerInput.requestEnvelope.request.intent
         && handlerInput.requestEnvelope.request.intent.slots.City
         && handlerInput.requestEnvelope.request.intent.slots.City.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
+        nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
         console.log(`Using city nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
       if (handlerInput.requestEnvelope.request.intent
         && handlerInput.requestEnvelope.request.intent.slots.Street
         && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
+        nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
         console.log(`Using street nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
+      if (sessionAttributes.invalidStopName) {
+        const invalidStopNameSpeech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+        const invalidStopNameDisplay = `Stop name ${nickname} is invalid.`;
+        return handlerInput.responseBuilder
+          .speak(invalidStopNameSpeech)
+          .reprompt(constants.REPROMPT_GET_SUMMARY)
+          .withSimpleCard(constants.SKILL_NAME, invalidStopNameDisplay)
+          .withShouldEndSession(false)
+          .getResponse();
       }
       const data = sessionAttributes.recent;
       if (!data) {
@@ -130,17 +142,28 @@ function getRoute(handlerInput) {
           .withShouldEndSession(false)
           .getResponse();
       }
+      var nickname;
       if (handlerInput.requestEnvelope.request.intent.slots.City
         && handlerInput.requestEnvelope.request.intent.slots.City.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
+        nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
         console.log(`Using city nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
       if (handlerInput.requestEnvelope.request.intent.slots.Street
         && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
+        nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
         console.log(`Using street nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
+      if (sessionAttributes.invalidStopName) {
+        const invalidStopNameSpeech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+        const invalidStopNameDisplay = `Stop name ${nickname} is invalid.`;
+        return handlerInput.responseBuilder
+          .speak(invalidStopNameSpeech)
+          .reprompt(constants.REPROMPT_GET_SUMMARY)
+          .withSimpleCard(constants.SKILL_NAME, invalidStopNameDisplay)
+          .withShouldEndSession(false)
+          .getResponse();
       }
       const data = sessionAttributes.recent;
       data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
@@ -254,17 +277,28 @@ function addRoute(handlerInput) {
 
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
+      var nickname;
       if (handlerInput.requestEnvelope.request.intent.slots.City
         && handlerInput.requestEnvelope.request.intent.slots.City.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
+        nickname = handlerInput.requestEnvelope.request.intent.slots.City.value.toLowerCase();
         console.log(`Using city nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       }
       if (handlerInput.requestEnvelope.request.intent.slots.Street
         && handlerInput.requestEnvelope.request.intent.slots.Street.value) {
-        const nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
+        nickname = handlerInput.requestEnvelope.request.intent.slots.Street.value.toLowerCase();
         console.log(`Using street nickname ${nickname} for stop.`);
         sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
+      }
+      if (sessionAttributes.invalidStopName) {
+        const invalidStopNameSpeech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+        const invalidStopNameDisplay = `Stop name ${nickname} is invalid.`;
+        return handlerInput.responseBuilder
+          .speak(invalidStopNameSpeech)
+          .reprompt(constants.REPROMPT_GET_SUMMARY)
+          .withSimpleCard(constants.SKILL_NAME, invalidStopNameDisplay)
+          .withShouldEndSession(false)
+          .getResponse();
       }
       const data = sessionAttributes.recent;
       data.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
@@ -622,13 +656,16 @@ function address(string) {
 }
 
 function getSpecificLocation(sessionAttributes, nickname) {
-  if (sessionAttributes.recent.stopName === nickname) {
-    return sessionAttributes;
+  const index = levenshtein.getBestMatch(nickname, sessionAttributes.recent, sessionAttributes.stops);
+  if (index === null) {
+    sessionAttributes.invalidStopName = true;
+  } else {
+    sessionAttributes.invalidStopName = false;
+    if (index >= 0) {
+      sessionAttributes.recent = sessionAttributes.stops[index];
+    }
   }
-  const index = _.findIndex(sessionAttributes.stops, s => (s.stopName === nickname));
-  if (index !== -1) {
-    sessionAttributes.recent = sessionAttributes.stops[index];
-  }
+
   return sessionAttributes;
 }
 

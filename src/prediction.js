@@ -99,9 +99,9 @@ function concatenate(results) {
   } else if (results.length === 2) {
     return results.join(' and ');
   }
-  const last = results.splice(results.length - 1, 1);
-  var stringToReturn = results.join(', ');
-  stringToReturn += ` and ${last}`;
+  const excludeLast = _.initial(results);
+  var stringToReturn = excludeLast.join(', ');
+  stringToReturn += ` and ${results[results.length - 1]}`;
 
   return stringToReturn;
 }
