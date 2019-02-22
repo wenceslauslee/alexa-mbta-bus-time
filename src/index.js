@@ -5,7 +5,6 @@ const timeHelper = require('./time-helper');
 
 const HELP_MESSAGE = 'You can say where is route 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
-const STOP_MESSAGE = 'Goodbye!';
 
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
@@ -132,7 +131,7 @@ const CityIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'CityIntent';
   },
   handle(handlerInput) {
-    return indexHelper.handleCityInput(handlerInput);
+    return indexHelper.handleNameInput(handlerInput);
   },
 }
 
@@ -142,7 +141,7 @@ const StreetIntentHandler = {
       && handlerInput.requestEnvelope.request.intent.name === 'StreetIntent';
   },
   handle(handlerInput) {
-    return indexHelper.handleStreetInput(handlerInput);
+    return indexHelper.handleNameInput(handlerInput);
   },
 }
 
@@ -188,8 +187,8 @@ const CancelIntentHandler = {
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
-      .speak(STOP_MESSAGE)
-      .withSimpleCard(constants.SKILL_NAME, STOP_MESSAGE)
+      .speak(constants.STOP_MESSAGE)
+      .withSimpleCard(constants.SKILL_NAME, constants.STOP_MESSAGE)
       .withShouldEndSession(true)
       .getResponse();
   },
@@ -202,8 +201,8 @@ const StopIntentHandler = {
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
-      .speak(STOP_MESSAGE)
-      .withSimpleCard(constants.SKILL_NAME, STOP_MESSAGE)
+      .speak(constants.STOP_MESSAGE)
+      .withSimpleCard(constants.SKILL_NAME, constants.STOP_MESSAGE)
       .withShouldEndSession(true)
       .getResponse();
   }
@@ -231,7 +230,7 @@ const SessionEndedRequestHandler = {
     console.log(`Session ended with reason: ${handlerInput.requestEnvelope.request.reason}`);
 
     return handlerInput.responseBuilder
-      .speak(STOP_MESSAGE)
+      .speak(constants.STOP_MESSAGE)
       .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_TRY_AGAIN)
       .withShouldEndSession(true)
       .getResponse();

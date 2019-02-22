@@ -1,6 +1,8 @@
 module.exports = {
+	// Skill related constants
 	SKILL_NAME: 'MBTA Bus Time',
 
+	// Prompts
 	FOLLOW_UP_PROMPT: 'Would you like to do anything else?',
 	FOLLOW_UP_PROMPT_SHORT: 'What else?',
 	FOLLOW_UP_STOP_NAME_PROMPT: 'What would you like to call this stop? You can use a city or street name.',
@@ -14,6 +16,9 @@ module.exports = {
 	REPROMPT_TRY_AGAIN: 'I did not quite get that. Please try again.',
 	TRY_AGAIN_PROMPT: 'Please try again.',
 
+	STOP_MESSAGE: 'Goodbye.',
+
+	// Intents
 	GET_ROUTE_INTENT: 'GetRouteIntent',
 	GET_ROUTE_INTENT_STREET: 'GetRouteIntentStreet',
 	GET_SUMMARY_INTENT: 'GetSummaryIntent',
