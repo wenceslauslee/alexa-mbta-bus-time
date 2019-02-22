@@ -206,6 +206,19 @@ function addStop(handlerInput) {
                 + `into saved stops. ${constants.FOLLOW_UP_STOP_NAME_PROMPT}`;
 
             if (recent.stopName) {
+              // Check if name is already used
+              const sameName = _.find(sessionAttributes.stops, s => s.stopName === name);
+              if (sameName) {
+                const speechOutput = `The name ${name} has already been used. ${constants.TRY_AGAIN_PROMPT}`;
+                const displayOutput = `The name ${name} has already been used.`;
+                return handlerInput.responseBuilder
+                  .speak(speechOutput)
+                  .reprompt(constants.REPROMPT_REPEAT)
+                  .withSimpleCard(constants.SKILL_NAME, displayOutput)
+                  .withShouldEndSession(false)
+                  .getResponse();
+              }
+
               addStopDisplay = `Stop (${stopId}) ${stop.attributes.name} (${recent.stopName}) added.`;
               addStopConfirmation = `Adding stop ${digitize(stopId)}, ${address(stop.attributes.name)}, `
                 + `into saved stops. Using ${recent.stopName} as stop name. ${constants.FOLLOW_UP_YES_NO_PROMPT}`;
@@ -487,6 +500,18 @@ function handleNameInput(handlerInput) {
         .withShouldEndSession(false)
         .getResponse();
   } else if (currentState === constants.ADD_STOP_INTENT) {
+    const sameName = _.find(sessionAttributes.stops, s => s.stopName === name);
+    if (sameName) {
+      const speechOutput = `The name ${name} has already been used. ${constants.TRY_AGAIN_PROMPT}`;
+      const displayOutput = `The name ${name} has already been used.`;
+      return handlerInput.responseBuilder
+        .speak(speechOutput)
+        .reprompt(constants.REPROMPT_REPEAT)
+        .withSimpleCard(constants.SKILL_NAME, displayOutput)
+        .withShouldEndSession(false)
+        .getResponse();
+    }
+
     const data = sessionAttributes.recent;
     data.stopName = name;
     attributes.setAttributes(handlerInput, sessionAttributes);

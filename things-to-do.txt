@@ -1,4 +1,5 @@
 	* Store unique names
+	* Get names by comparing differences
 Create flow to store direction name into DynamoDB
 	* Guarantee uniqueness
 
