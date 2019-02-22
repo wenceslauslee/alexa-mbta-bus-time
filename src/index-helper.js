@@ -394,11 +394,10 @@ function handleNumberInput(handlerInput) {
             stopId: stop.id
           };
           sessionAttributes.recent = recent;
-          sessionAttributes.currentState = constants.ADD_ROUTE_INTENT;
           attributes.setAttributes(handlerInput, sessionAttributes);
           const addStopDisplay = `Stop (${stopId}) ${stop.attributes.name} added.`;
           const addStopConfirmation = `Adding stop ${digitize(number)}, ${address(stop.attributes.name)}, `
-            + `into saved stops. ${constants.FOLLOW_UP_ROUTE_PROMPT}`;
+            + `into saved stops. ${constants.FOLLOW_UP_STOP_NAME_PROMPT}`;
 
           return handlerInput.responseBuilder
             .speak(addStopConfirmation)
@@ -450,6 +449,80 @@ function handleNumberInput(handlerInput) {
     console.log(errorMessage);
     throw new Error(errorMessage);
   }
+}
+
+function handleCityInput(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+  const name = handlerInput.requestEnvelope.request.intent.slots.City.value;
+  const addStopConfirmation = `Using ${name} as stop name. ${constants.FOLLOW_UP_YES_NO_PROMPT}`;
+  const addStopDisplay = `Using ${name} as stop name.`;
+
+  const sessionAttributes = attributes.getAttributes(handlerInput);
+  const currentState = sessionAttributes['currentState'];
+  if (!currentState) {
+    return handlerInput.responseBuilder
+        .speak(constants.REPROMPT_GET_SUMMARY)
+        .reprompt(constants.REPROMPT_GET_SUMMARY)
+        .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_GET_SUMMARY)
+        .withShouldEndSession(false)
+        .getResponse();
+  } else if (currentState === constants.ADD_STOP_INTENT) {
+    const data = sessionAttributes.recent;
+    data.stopName = name;
+    attributes.setAttributes(handlerInput, sessionAttributes);
+
+    return handlerInput.responseBuilder
+      .speak(addStopConfirmation)
+      .reprompt(constants.REPROMPT_REPEAT)
+      .withSimpleCard(constants.SKILL_NAME, addStopDisplay)
+      .withShouldEndSession(false)
+      .getResponse();
+  } else {
+    const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
+    console.log(errorMessage);
+    throw new Error(errorMessage);
+  }
+}
+
+function handleStreetInput(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+  const name = handlerInput.requestEnvelope.request.intent.slots.Street.value;
+  const addStopConfirmation = `Using ${name} as stop name. ${constants.FOLLOW_UP_YES_NO_PROMPT}`;
+  const addStopDisplay = `Using ${name} as stop name.`;
+
+  const sessionAttributes = attributes.getAttributes(handlerInput);
+  const currentState = sessionAttributes['currentState'];
+  if (!currentState) {
+    return handlerInput.responseBuilder
+        .speak(constants.REPROMPT_GET_SUMMARY)
+        .reprompt(constants.REPROMPT_GET_SUMMARY)
+        .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_GET_SUMMARY)
+        .withShouldEndSession(false)
+        .getResponse();
+  } else if (currentState === constants.ADD_STOP_INTENT) {
+    const data = sessionAttributes.recent;
+    data.stopName = name;
+    attributes.setAttributes(handlerInput, sessionAttributes);
+
+    return handlerInput.responseBuilder
+      .speak(addStopConfirmation)
+      .reprompt(constants.REPROMPT_REPEAT)
+      .withSimpleCard(constants.SKILL_NAME, addStopDisplay)
+      .withShouldEndSession(false)
+      .getResponse();
+  } else {
+    const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
+    console.log(errorMessage);
+    throw new Error(errorMessage);
+  }
+}
+
+function handleYesInput(handlerInput) {
+
+}
+
+function handleNoInput(handlerInput) {
+
 }
 
 function getSessionAttributes(handlerInput, deviceId) {
@@ -506,4 +579,8 @@ module.exports = {
   deleteStop: deleteStop,
   deleteRoute: deleteRoute,
   handleNumberInput: handleNumberInput,
+  handleCityInput: handleCityInput,
+  handleStreetInput: handleStreetInput,
+  handleYesInput: handleYesInput,
+  handleNoInput: handleNoInput
 };

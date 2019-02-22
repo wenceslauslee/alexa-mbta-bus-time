@@ -126,6 +126,46 @@ const NumberIntentHandler = {
   },
 }
 
+const CityIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'CityIntent';
+  },
+  handle(handlerInput) {
+    return indexHelper.handleCityInput(handlerInput);
+  },
+}
+
+const StreetIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'StreetIntent';
+  },
+  handle(handlerInput) {
+    return indexHelper.handleStreetInput(handlerInput);
+  },
+}
+
+const YesIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.YesIntent';
+  },
+  handle(handlerInput) {
+    return indexHelper.handleYesInput(handlerInput);
+  },
+};
+
+const NoIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.NoIntent';
+  },
+  handle(handlerInput) {
+    return indexHelper.handleNoInput(handlerInput);
+  },
+};
+
 const HelpIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -228,6 +268,10 @@ exports.handler = skillBuilder
     DeleteStopIntentHandler,
     DeleteRouteIntentHandler,
     NumberIntentHandler,
+    CityIntentHandler,
+    StreetIntentHandler,
+    YesIntentHandler,
+    NoIntentHandler,
     HelpIntentHandler,
     CancelIntentHandler,
     StopIntentHandler,

@@ -3,7 +3,9 @@ module.exports = {
 
 	FOLLOW_UP_PROMPT: 'Would you like to do anything else?',
 	FOLLOW_UP_PROMPT_SHORT: 'What else?',
+	FOLLOW_UP_STOP_NAME_PROMPT: 'What would you like to call this stop? You can use a city or street name.',
 	FOLLOW_UP_ROUTE_PROMPT: 'What route would you like to add to this stop?',
+	FOLLOW_UP_YES_NO_PROMPT: 'Is that correct?',
   REPROMPT_ADD_ROUTE: 'I did not quite get that.  Would you like to add a specific route?',
   REPROMPT_ADD_STOP: 'I did not quite get that.  Would you like to add a specific stop?',
   REPROMPT_GET_ROUTE: 'I did not quite get that.  Would you like to ask for a specific route?',

@@ -1,4 +1,3 @@
-Fix card display for digitized numbers
 Create flow to store stop name into DynamoDB
 	* Store unique names
 Create flow to store direction name into DynamoDB
