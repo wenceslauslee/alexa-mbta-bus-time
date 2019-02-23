@@ -5,19 +5,15 @@ const _ = require('underscore');
 
 const tableName = 'mbtabustime-stop-route';
 
-function create(deviceId, stopId, routes, stopName, lastUpdatedDateTime) {
-  if (!stopName) {
-    stopName = '---';
-  }
-
+function create(deviceId, stopId, direction, stopName, lastUpdatedDateTime, routeIds) {
   const params = {
     TableName: tableName,
     Item: {
       "deviceId": deviceId,
-      "stopId": stopId,
-      "routes": routes,
+      "stopId": encodeStop(stopId, direction),
       "stopName": stopName,
-      "lastUpdatedDateTime": lastUpdatedDateTime
+      "lastUpdatedDateTime": lastUpdatedDateTime,
+      "routeIds": routeIds
     }
   };
 
@@ -27,7 +23,7 @@ function create(deviceId, stopId, routes, stopName, lastUpdatedDateTime) {
 function query(deviceId) {
   const params = {
     TableName : tableName,
-    ProjectionExpression:"deviceId, stopId, routes, stopName, lastUpdatedDateTime",
+    ProjectionExpression:"deviceId, stopId, stopName, lastUpdatedDateTime, routeIds",
     KeyConditionExpression: "deviceId = :d",
     ExpressionAttributeValues: {
       ":d": deviceId
@@ -36,6 +32,14 @@ function query(deviceId) {
 
   return db.query(params)
   	.then(data => {
+      data = _.map(data, d => {
+        const decodedStop = decodeStop(d.stopId);
+        d.stopId = decodedStop.stopId;
+        d.direction = decodedStop.direction;
+
+        return d;
+      });
+
   	  if (data && data.length > 0) {
         return {
           recent: _.max(data, d => moment(d.lastUpdatedDateTime).valueOf()),
@@ -73,20 +77,16 @@ function remove(deviceId, stopId) {
   return db.remove(params);
 }
 
-function update(deviceId, stopId, routes, stopName, lastUpdatedDateTime) {
-  if (!stopName) {
-    stopName = '---'
-  }
-
+function update(deviceId, stopIdDirection, stopName, lastUpdatedDateTime, routeIds) {
   const params = {
     TableName: tableName,
     Key: {
       "deviceId": deviceId,
-      "stopId": stopId
+      "stopId": stopIdDirection
     },
-    UpdateExpression: "set routes = :r, stopName= :s, lastUpdatedDateTime = :t",
+    UpdateExpression: "set routeIds = :r, stopName= :s, lastUpdatedDateTime = :t",
     ExpressionAttributeValues: {
-      ":r": routes,
+      ":r": routeIds,
       ":s": stopName,
       ":t": lastUpdatedDateTime,
     },
@@ -97,7 +97,21 @@ function update(deviceId, stopId, routes, stopName, lastUpdatedDateTime) {
 }
 
 function updateEntry(recent) {
-  return update(recent.deviceId, recent.stopId, recent.routes, recent.stopName, recent.lastUpdatedDateTime);
+  return update(recent.deviceId, encodeStop(recent.stopId, recent.direction), recent.stopName,
+    recent.lastUpdatedDateTime, recent.routeIds);
+}
+
+function encodeStop(stopId, direction) {
+  return `${stopId}-${direction}`;
+}
+
+function decodeStop(stopDirection) {
+  const index = stopDirection.indexOf('-');
+
+  return {
+    stopId: stopDirection.substring(0, index),
+    direction: parseInt(stopDirection.substring(index + 1))
+  };
 }
 
 module.exports = {

@@ -1,7 +1,7 @@
 const request = require('request-promise');
 const _ = require('underscore');
 
-function getEarliestSchedule(routeId, direction, stopId, date, time) {
+function getEarliestSchedule(stopId, direction, routeId, date, time) {
   const formattedTime = time.replace(':', '%3A');
 
   return request({
@@ -31,7 +31,7 @@ function getEarliestSchedule(routeId, direction, stopId, date, time) {
     });
 }
 
-function getPredictions(routeId, direction, stopId) {
+function getPredictions(stopId, direction, routeId) {
   return request({
     uri: `https://api-v3.mbta.com/predictions?filter%5Bstop%5D=${stopId}&filter%5Broute%5D=${routeId}`
       + `&filter%5Bdirection_id%5D=${direction}`,

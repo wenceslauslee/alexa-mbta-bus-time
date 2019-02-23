@@ -1,9 +1,9 @@
-Create flow to store direction name into DynamoDB
-	* Guarantee uniqueness
+Potentially look to remove progressive directives
+Reprompting needs to be specific
 Speech needs to be more geared towards intent
 Major refactoring to consolidate terms and variables/functions
-	* Careful of routes vs routeIds
-Add testing plan
-	* Come up with testing framework
+Formatting of code
+Store index in sessionAttribute for stops and recent
+Come up with testing framework
 
 rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTime --zip-file fileb://bus-time.zip
