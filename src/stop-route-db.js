@@ -5,7 +5,7 @@ const _ = require('underscore');
 
 const tableName = 'mbtabustime-stop-route';
 
-function create(deviceId, stopId, routeIds, stopName, lastUpdatedDateTime) {
+function create(deviceId, stopId, routes, stopName, lastUpdatedDateTime) {
   if (!stopName) {
     stopName = '---';
   }
@@ -15,7 +15,7 @@ function create(deviceId, stopId, routeIds, stopName, lastUpdatedDateTime) {
     Item: {
       "deviceId": deviceId,
       "stopId": stopId,
-      "routeIds": routeIds,
+      "routes": routes,
       "stopName": stopName,
       "lastUpdatedDateTime": lastUpdatedDateTime
     }
@@ -27,7 +27,7 @@ function create(deviceId, stopId, routeIds, stopName, lastUpdatedDateTime) {
 function query(deviceId) {
   const params = {
     TableName : tableName,
-    ProjectionExpression:"deviceId, stopId, routeIds, stopName, lastUpdatedDateTime",
+    ProjectionExpression:"deviceId, stopId, routes, stopName, lastUpdatedDateTime",
     KeyConditionExpression: "deviceId = :d",
     ExpressionAttributeValues: {
       ":d": deviceId
@@ -73,7 +73,7 @@ function remove(deviceId, stopId) {
   return db.remove(params);
 }
 
-function update(deviceId, stopId, routeIds, stopName, lastUpdatedDateTime) {
+function update(deviceId, stopId, routes, stopName, lastUpdatedDateTime) {
   if (!stopName) {
     stopName = '---'
   }
@@ -84,20 +84,20 @@ function update(deviceId, stopId, routeIds, stopName, lastUpdatedDateTime) {
       "deviceId": deviceId,
       "stopId": stopId
     },
-    UpdateExpression: "set routeIds = :r, stopName= :s, lastUpdatedDateTime = :t",
+    UpdateExpression: "set routes = :r, stopName= :s, lastUpdatedDateTime = :t",
     ExpressionAttributeValues: {
-      ":r": routeIds,
+      ":r": routes,
       ":s": stopName,
       ":t": lastUpdatedDateTime,
     },
     ReturnValues: "UPDATED_NEW"
   };
-  
+
   return db.update(params);
 }
 
 function updateEntry(recent) {
-  return update(recent.deviceId, recent.stopId, recent.routeIds, recent.stopName, recent.lastUpdatedDateTime);
+  return update(recent.deviceId, recent.stopId, recent.routes, recent.stopName, recent.lastUpdatedDateTime);
 }
 
 module.exports = {

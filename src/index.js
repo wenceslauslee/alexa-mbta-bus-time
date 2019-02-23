@@ -145,6 +145,16 @@ const StreetIntentHandler = {
   },
 }
 
+const DirectionIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
+      && handlerInput.requestEnvelope.request.intent.name === 'DirectionIntent';
+  },
+  handle(handlerInput) {
+    return indexHelper.handleDirectionInput(handlerInput);
+  },
+}
+
 const YesIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest'
@@ -269,6 +279,7 @@ exports.handler = skillBuilder
     NumberIntentHandler,
     CityIntentHandler,
     StreetIntentHandler,
+    DirectionIntentHandler,
     YesIntentHandler,
     NoIntentHandler,
     HelpIntentHandler,

@@ -5,6 +5,7 @@ module.exports = {
 	// Prompts
 	FOLLOW_UP_PROMPT: 'Would you like to do anything else?',
 	FOLLOW_UP_PROMPT_SHORT: 'What else?',
+	FOLLOW_UP_DIRECTION_PROMPT: 'Is this an inbound or outbound route?',
 	FOLLOW_UP_STOP_NAME_PROMPT: 'What would you like to call this stop? You can use a city or street name.',
 	FOLLOW_UP_ROUTE_PROMPT: 'What route would you like to add to this stop?',
 	FOLLOW_UP_YES_NO_PROMPT: 'Is that correct?',
@@ -28,5 +29,11 @@ module.exports = {
 	ADD_STOP_INTENT: 'AddStopIntent',
 	ADD_STOP_INTENT_STREET: 'AddStopIntentStreet',
 	DELETE_ROUTE_INTENT: 'DeleteRouteIntent',
-	DELETE_STOP_INTENT: 'DeleteStopIntent'
+	DELETE_STOP_INTENT: 'DeleteStopIntent',
+
+	// Direction
+	INBOUND: 1,
+	INBOUND_TEXT: 'inbound',
+	OUTBOUND: 0,
+	OUTBOUND_TEXT: 'outbound'
 };
