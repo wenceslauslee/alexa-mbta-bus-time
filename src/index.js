@@ -1,7 +1,6 @@
 const Alexa = require('ask-sdk-core');
 const constants = require('./constants');
 const indexHelper = require('./index-helper');
-const timeHelper = require('./time-helper');
 
 const HELP_MESSAGE = 'You can say where is route 11, or, you can say give me a summary.';
 const HELP_REPROMPT = 'What can I help you with?';
@@ -11,164 +10,164 @@ const LaunchRequestHandler = {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
   },
   handle(handlerInput) {
-    return indexHelper.getSummary(handlerInput)
+    return indexHelper.getSummary(handlerInput);
   }
 };
 
 const GetRouteIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.GET_ROUTE_INTENT;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.GET_ROUTE_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.getRoute(handlerInput);
-  },
+  }
 };
 
 const GetRouteIntentStreetHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.GET_ROUTE_INTENT_STREET;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.GET_ROUTE_INTENT_STREET;
   },
   handle(handlerInput) {
     return indexHelper.getRoute(handlerInput);
-  },
+  }
 };
 
 const GetSummaryIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.GET_SUMMARY_INTENT;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.GET_SUMMARY_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.getSummary(handlerInput);
-  },
+  }
 };
 
 const GetSummaryIntentStreetHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.GET_SUMMARY_INTENT_STREET;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.GET_SUMMARY_INTENT_STREET;
   },
   handle(handlerInput) {
     return indexHelper.getSummary(handlerInput);
-  },
+  }
 };
 
 const AddStopIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.ADD_STOP_INTENT;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.ADD_STOP_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.addStop(handlerInput);
-  },
+  }
 };
 
 const AddRouteIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.ADD_ROUTE_INTENT;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.ADD_ROUTE_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.addRoute(handlerInput);
-  },
+  }
 };
 
 const AddRouteIntentStreetHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.ADD_ROUTE_INTENT_STREET;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.ADD_ROUTE_INTENT_STREET;
   },
   handle(handlerInput) {
     return indexHelper.addRoute(handlerInput);
-  },
+  }
 };
 
 const DeleteStopIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.DELETE_STOP_INTENT;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.DELETE_STOP_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.deleteStop(handlerInput);
-  },
+  }
 };
 
 const DeleteRouteIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === constants.DELETE_ROUTE_INTENT;
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.DELETE_ROUTE_INTENT;
   },
   handle(handlerInput) {
     return indexHelper.deleteRoute(handlerInput);
-  },
+  }
 };
 
 const NumberIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'NumberIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'NumberIntent';
   },
   handle(handlerInput) {
     return indexHelper.handleNumberInput(handlerInput);
-  },
-}
+  }
+};
 
 const CityIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'CityIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'CityIntent';
   },
   handle(handlerInput) {
     return indexHelper.handleNameInput(handlerInput);
-  },
-}
+  }
+};
 
 const StreetIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'StreetIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'StreetIntent';
   },
   handle(handlerInput) {
     return indexHelper.handleNameInput(handlerInput);
-  },
-}
+  }
+};
 
 const DirectionIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'DirectionIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'DirectionIntent';
   },
   handle(handlerInput) {
     return indexHelper.handleDirectionInput(handlerInput);
-  },
-}
+  }
+};
 
 const YesIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.YesIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'AMAZON.YesIntent';
   },
   handle(handlerInput) {
     return indexHelper.handleYesInput(handlerInput);
-  },
+  }
 };
 
 const NoIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.NoIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'AMAZON.NoIntent';
   },
   handle(handlerInput) {
     return indexHelper.handleNoInput(handlerInput);
-  },
+  }
 };
 
 const HelpIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
@@ -182,8 +181,8 @@ const HelpIntentHandler = {
 
 const CancelIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.CancelIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'AMAZON.CancelIntent';
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
@@ -191,13 +190,13 @@ const CancelIntentHandler = {
       .withSimpleCard(constants.SKILL_NAME, constants.STOP_MESSAGE)
       .withShouldEndSession(true)
       .getResponse();
-  },
+  }
 };
 
 const StopIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'AMAZON.StopIntent';
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
@@ -210,8 +209,8 @@ const StopIntentHandler = {
 
 const FallbackIntentHandler = {
   canHandle(handlerInput) {
-    return handlerInput.requestEnvelope.request.type === 'IntentRequest'
-      && handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent';
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent';
   },
   handle(handlerInput) {
     return handlerInput.responseBuilder
@@ -219,7 +218,7 @@ const FallbackIntentHandler = {
       .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_TRY_AGAIN)
       .withShouldEndSession(false)
       .getResponse();
-  },
+  }
 };
 
 const SessionEndedRequestHandler = {
@@ -234,7 +233,7 @@ const SessionEndedRequestHandler = {
       .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_TRY_AGAIN)
       .withShouldEndSession(true)
       .getResponse();
-  },
+  }
 };
 
 const ErrorHandler = {

@@ -65,20 +65,17 @@ function formatResult(result) {
   if (result.predictions) {
     if (result.predictions.length > 1) {
       return {
-        speech: `The next predicted times for route ${digitize(result.id)} `
-          + `are at ${concatenate(result.predictions)}.`,
+        speech: `The next predicted times for route ${digitize(result.id)} are at ${concatenate(result.predictions)}.`,
         display: `${result.id}: ${concatenate(result.predictions)}`
       };
     }
     return {
-      speech: `The next predicted time for route ${digitize(result.id)} `
-        + `is at ${concatenate(result.predictions)}.`,
+      speech: `The next predicted time for route ${digitize(result.id)} is at ${concatenate(result.predictions)}.`,
       display: `${result.id}: ${concatenate(result.predictions)}`
     };
   }
   return {
-    speech: `The next scheduled trip for route ${digitize(result.id)} `
-      + `is at ${result.scheduled}.`,
+    speech: `The next scheduled trip for route ${digitize(result.id)} is at ${result.scheduled}.`,
     display: `${result.id}: ${result.scheduled}`
   };
 }

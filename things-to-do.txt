@@ -1,8 +1,8 @@
+Add direction to names utterances/intent
 Potentially look to remove progressive directives
 Reprompting needs to be specific
 Speech needs to be more geared towards intent
 Major refactoring to consolidate terms and variables/functions
-Formatting of code
 Store index in sessionAttribute for stops and recent
 Come up with testing framework
 

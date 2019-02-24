@@ -1,6 +1,5 @@
 const db = require('./db-api');
 const moment = require('moment-timezone');
-const timeHelper = require('./time-helper');
 const _ = require('underscore');
 
 const tableName = 'mbtabustime-stop-route';
@@ -9,11 +8,11 @@ function create(deviceId, stopId, direction, stopName, lastUpdatedDateTime, rout
   const params = {
     TableName: tableName,
     Item: {
-      "deviceId": deviceId,
-      "stopId": encodeStop(stopId, direction),
-      "stopName": stopName,
-      "lastUpdatedDateTime": lastUpdatedDateTime,
-      "routeIds": routeIds
+      'deviceId': deviceId,
+      'stopId': encodeStop(stopId, direction),
+      'stopName': stopName,
+      'lastUpdatedDateTime': lastUpdatedDateTime,
+      'routeIds': routeIds
     }
   };
 
@@ -22,16 +21,16 @@ function create(deviceId, stopId, direction, stopName, lastUpdatedDateTime, rout
 
 function query(deviceId) {
   const params = {
-    TableName : tableName,
-    ProjectionExpression:"deviceId, stopId, stopName, lastUpdatedDateTime, routeIds",
-    KeyConditionExpression: "deviceId = :d",
+    TableName: tableName,
+    ProjectionExpression: 'deviceId, stopId, stopName, lastUpdatedDateTime, routeIds',
+    KeyConditionExpression: 'deviceId = :d',
     ExpressionAttributeValues: {
-      ":d": deviceId
+      ':d': deviceId
     }
   };
 
   return db.query(params)
-  	.then(data => {
+    .then(data => {
       data = _.map(data, d => {
         const decodedStop = decodeStop(d.stopId);
         d.stopId = decodedStop.stopId;
@@ -40,25 +39,25 @@ function query(deviceId) {
         return d;
       });
 
-  	  if (data && data.length > 0) {
+      if (data && data.length > 0) {
         return {
           recent: _.max(data, d => moment(d.lastUpdatedDateTime).valueOf()),
           stops: data
         };
-  	  }
-  	  return {
+      }
+      return {
         recent: null,
         stops: []
       };
-  	});
+    });
 }
 
 function retrieve(deviceId, stopId) {
   const params = {
     TableName: tableName,
     Key: {
-      "deviceId": deviceId,
-      "stopId": stopId
+      'deviceId': deviceId,
+      'stopId': stopId
     }
   };
 
@@ -69,8 +68,8 @@ function remove(deviceId, stopId) {
   const params = {
     TableName: tableName,
     Key: {
-      "deviceId": deviceId,
-      "stopId": stopId
+      'deviceId': deviceId,
+      'stopId': stopId
     }
   };
 
@@ -81,16 +80,16 @@ function update(deviceId, stopIdDirection, stopName, lastUpdatedDateTime, routeI
   const params = {
     TableName: tableName,
     Key: {
-      "deviceId": deviceId,
-      "stopId": stopIdDirection
+      'deviceId': deviceId,
+      'stopId': stopIdDirection
     },
-    UpdateExpression: "set routeIds = :r, stopName= :s, lastUpdatedDateTime = :t",
+    UpdateExpression: 'set routeIds = :r, stopName= :s, lastUpdatedDateTime = :t',
     ExpressionAttributeValues: {
-      ":r": routeIds,
-      ":s": stopName,
-      ":t": lastUpdatedDateTime,
+      ':r': routeIds,
+      ':s': stopName,
+      ':t': lastUpdatedDateTime
     },
-    ReturnValues: "UPDATED_NEW"
+    ReturnValues: 'UPDATED_NEW'
   };
 
   return db.update(params);

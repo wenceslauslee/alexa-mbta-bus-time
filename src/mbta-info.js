@@ -8,10 +8,10 @@ function isStopIdValid(stopId) {
 }
 
 function getStop(stopId) {
-	return mbta.getStop(stopId);
+  return mbta.getStop(stopId);
 }
 
 module.exports = {
-	getStop: getStop,
+  getStop: getStop,
   isStopIdValid: isStopIdValid
 };
