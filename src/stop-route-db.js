@@ -40,14 +40,23 @@ function query(deviceId) {
       });
 
       if (data && data.length > 0) {
+        const recent = _.max(data, d => moment(d.lastUpdatedDateTime).valueOf());
+        const index = _.find(data, d => recent.stopId === d.stopId && recent.direction === d.direction);
+
         return {
           recent: _.max(data, d => moment(d.lastUpdatedDateTime).valueOf()),
-          stops: data
+          stops: data,
+          index: index,
+          currentState: null,
+          invalidOperation: false
         };
       }
       return {
         recent: null,
-        stops: []
+        stops: [],
+        index: -1,
+        currentState: null,
+        invalidOperation: false
       };
     });
 }

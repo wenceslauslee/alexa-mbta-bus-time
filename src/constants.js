@@ -7,6 +7,7 @@ module.exports = {
   FOLLOW_UP_PROMPT_SHORT: 'What else?',
   FOLLOW_UP_DIRECTION_PROMPT: 'Is this an inbound or outbound route?',
   FOLLOW_UP_STOP_NAME_PROMPT: 'What would you like to call this stop? You can use a city or street name.',
+  FOLLOW_UP_STOP_PROMPT: 'What stop number would you like to use by default?',
   FOLLOW_UP_ROUTE_PROMPT: 'What route would you like to add to this stop?',
   FOLLOW_UP_YES_NO_PROMPT: 'Is that correct?',
   REPROMPT_ADD_ROUTE: 'I did not quite get that. Would you like to add a specific route?',

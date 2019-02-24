@@ -3,7 +3,7 @@ Potentially look to remove progressive directives
 Reprompting needs to be specific
 Speech needs to be more geared towards intent
 Major refactoring to consolidate terms and variables/functions
-Store index in sessionAttribute for stops and recent
+Store index in sessionAttribute for stops and recent, save state properly
 Come up with testing framework
 
 rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTime --zip-file fileb://bus-time.zip
