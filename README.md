@@ -13,16 +13,14 @@ Please look up your bus stop ID via https://www.mbta.com/schedules/bus. The ID w
 
 ### How to use skill (example utterances)
 
-> Add stop 123
-> Add stop 123 as "Home"
-> Add route 456
-> Add route 456 to "Home"
-> Get summary
-> Give me a summary
-> Get summary at "Home"
-> Get route 456
-> Get route 456 at "Home"
-> Delete stop
+> Add stop 123  
+> Add route 456    
+> Get summary  
+> Give me a summary  
+> Get summary at "Home"  
+> Get route 456  
+> Get route 456 at "Home"  
+> Delete stop  
 > Delete route 456
 
 ### Installation
