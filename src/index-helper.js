@@ -204,9 +204,9 @@ function addStop(handlerInput) {
             sessionAttributes.currentState = constants.ADD_STOP_INTENT;
             attributes.setAttributes(handlerInput, sessionAttributes);
 
-            const display = `Stop (${stopId}) ${stop.attributes.name} added.`;
-            const speech = `Adding stop ${digitize(stopId)}, ${address(stop.attributes.name)}, ` +
-                `into saved stops. ${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
+            const display = `Stop (${stopId}) ${stop.attributes.name} selected.`;
+            const speech = `Selecting stop ${digitize(stopId)}, ${address(stop.attributes.name)}. ` +
+                `${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
 
             return handlerInput.responseBuilder
               .speak(speech)
@@ -296,7 +296,7 @@ function deleteStop(handlerInput) {
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
       if (sessionAttributes.recent === null) {
-        const display = `No stops found.`;
+        const display = `No stops related to your device.`;
         const speech = `There are no stops related to your device. ${constants.TRY_AGAIN_PROMPT}`;
 
         return handlerInput.responseBuilder
@@ -348,7 +348,7 @@ function deleteRoute(handlerInput) {
     .then(sessionAttributes => {
       const recent = sessionAttributes.recent;
       if (recent === null) {
-        const display = `No stops found.`;
+        const display = `Route ${routeId} deleted.`;
         const speech = `Deleting route ${digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
         return handlerInput.responseBuilder
@@ -409,9 +409,9 @@ function handleNumberInput(handlerInput) {
               };
               sessionAttributes.recent = recent;
               attributes.setAttributes(handlerInput, sessionAttributes);
-              const display = `Stop (${number}) ${stop.attributes.name} added.`;
-              const speech = `Adding stop ${digitize(number)}, ${address(stop.attributes.name)}, ` +
-                `into saved stops. ${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
+              const display = `Stop (${number}) ${stop.attributes.name} selected.`;
+              const speech = `Selecting stop ${digitize(number)}, ${address(stop.attributes.name)}, ` +
+                `${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
 
               return handlerInput.responseBuilder
                 .speak(speech)
@@ -575,9 +575,8 @@ function handleDirectionInput(handlerInput) {
         recent.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
         attributes.setAttributes(handlerInput, sessionAttributes);
 
-        const speech = `Adding stop ${digitize(recent.stopId)} into saved routes. ` +
-          `${constants.FOLLOW_UP_STOP_NAME_PROMPT}`;
-        const display = `Stop ${recent.stopId} added.`;
+        const speech = `OK. ${constants.FOLLOW_UP_STOP_NAME_PROMPT}`;
+        const display = `Setting stop ${recent.stopId} as ${directionValue}.`;
 
         return handlerInput.responseBuilder
           .speak(speech)
