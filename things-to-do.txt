@@ -1,5 +1,4 @@
 Add direction to names utterances/intent
-Reprompting needs to be specific
 Major refactoring to consolidate terms and variables/functions
 Have function which makes sure transition between intents is valid
 Come up with testing framework
