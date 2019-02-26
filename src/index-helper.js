@@ -38,6 +38,7 @@ function getSummary(handlerInput) {
       return getSessionAttributes(handlerInput, deviceId);
     })
     .then(sessionAttributes => {
+      refreshRecent(sessionAttributes);
       const recent = sessionAttributes.recent;
       if (!recent) {
         sessionAttributes.currentState = constants.ADD_STOP_INTENT;
@@ -52,6 +53,8 @@ function getSummary(handlerInput) {
       if (sessionAttributes.invalidOperation) {
         const speech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
         const display = `Stop name ${nickname} is invalid.`;
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
 
         return response(handlerInput, speech, display, constants.REPROMPT_GET_SUMMARY, false);
       }
@@ -65,6 +68,7 @@ function getSummary(handlerInput) {
       }
       recent.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
       sessionAttributes.stops[sessionAttributes.index] = recent;
+      sessionAttributes.currentState = null;
 
       return stopRouteDb.updateEntry(recent)
         .then(() => {
@@ -96,6 +100,7 @@ function getRoute(handlerInput) {
       return getSessionAttributes(handlerInput, deviceId);
     })
     .then(sessionAttributes => {
+      refreshRecent(sessionAttributes);
       const recent = sessionAttributes.recent;
       if (!recent) {
         sessionAttributes.currentState = constants.ADD_STOP_INTENT;
@@ -110,11 +115,14 @@ function getRoute(handlerInput) {
       if (sessionAttributes.invalidOperation) {
         const speech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
         const display = `Stop name ${nickname} is invalid.`;
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
 
         return response(handlerInput, speech, display, constants.REPROMPT_GET_SUMMARY, false);
       }
       recent.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
       sessionAttributes.stops[sessionAttributes.index] = recent;
+      sessionAttributes.currentState = null;
 
       return stopRouteDb.updateEntry(recent)
         .then(() => {
@@ -215,6 +223,17 @@ function deleteStop(handlerInput) {
       if (sessionAttributes.recent === null) {
         const display = `No stops related to your device.`;
         const speech = `There are no stops related to your device. ${constants.TRY_AGAIN_PROMPT}`;
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
+
+        return response(handlerInput, speech, display, constants.REPROMPT_REPEAT, false);
+      }
+      if (sessionAttributes.currentState === constants.ADD_STOP_INTENT) {
+        const display = `Stop deleted.`;
+        const speech = `Deleting stop. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+        refreshRecent(sessionAttributes);
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
 
         return response(handlerInput, speech, display, constants.REPROMPT_REPEAT, false);
       }
@@ -223,7 +242,8 @@ function deleteStop(handlerInput) {
 
       return stopRouteDb.remove(deviceId, stopId)
         .then(() => {
-          sessionAttributes = getNextRecentStop(sessionAttributes);
+          sessionAttributes = deleteAndGetNextRecentStop(sessionAttributes);
+          sessionAttributes.currentState = null;
           attributes.setAttributes(handlerInput, sessionAttributes);
           const recent = sessionAttributes.recent;
           if (recent) {
@@ -257,12 +277,24 @@ function deleteRoute(handlerInput) {
       if (recent === null) {
         const display = `Route ${routeId} deleted.`;
         const speech = `Deleting route ${digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
+
+        return response(handlerInput, speech, display, constants.REPROMPT_REPEAT, false);
+      }
+      if (sessionAttributes.currentState === constants.ADD_STOP_INTENT) {
+        const display = `Route ${routeId} deleted.`;
+        const speech = `Deleting route ${digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+        refreshRecent(sessionAttributes);
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
 
         return response(handlerInput, speech, display, constants.REPROMPT_REPEAT, false);
       }
       recent.routeIds = _.without(recent.routeIds, routeId);
       recent.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
       sessionAttributes.stops[sessionAttributes.index] = recent;
+      sessionAttributes.currentState = null;
 
       return stopRouteDb.updateEntry(recent)
         .then(() => {
@@ -569,10 +601,26 @@ function getSpecificLocation(sessionAttributes, nickname) {
   return sessionAttributes;
 }
 
-// Gets the next recent stop if current stop gets deleted.
-function getNextRecentStop(sessionAttributes) {
+// Gets the next recent stop and deletes current stop.
+function deleteAndGetNextRecentStop(sessionAttributes) {
   sessionAttributes.stops.splice(sessionAttributes.index, 1);
+  getNextRecentStop(sessionAttributes);
 
+  return sessionAttributes;
+}
+
+// Clears recent entry and gets the saved recent stop.
+function refreshRecent(sessionAttributes) {
+  const recent = sessionAttributes.recent;
+  if (!recent.stopName || !recent.stopId || !recent.direction) {
+    getNextRecentStop(sessionAttributes);
+  }
+
+  return sessionAttributes;
+}
+
+// Gets the next recent stop.
+function getNextRecentStop(sessionAttributes) {
   if (sessionAttributes.stops.length === 0) {
     sessionAttributes.recent = null;
     sessionAttributes.index = -1;
@@ -582,8 +630,6 @@ function getNextRecentStop(sessionAttributes) {
     sessionAttributes.recent = recent;
     sessionAttributes.index = index;
   }
-
-  return sessionAttributes;
 }
 
 function response(handlerInput, speech, display, reprompt, shouldEndSession) {

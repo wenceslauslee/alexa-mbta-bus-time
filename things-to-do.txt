@@ -2,5 +2,6 @@ Add direction to names utterances/intent
 Major refactoring to consolidate terms and variables/functions
 Have function which makes sure transition between intents is valid
 Come up with testing framework
+Record utterance trail
 
 rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTime --zip-file fileb://bus-time.zip
