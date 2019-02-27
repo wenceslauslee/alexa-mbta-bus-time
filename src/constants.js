@@ -3,22 +3,19 @@ module.exports = {
   SKILL_NAME: 'MBTA Bus Time',
 
   // Prompts
-  FOLLOW_UP_PROMPT: 'Would you like to do anything else?',
+  FOLLOW_UP_PROMPT: 'What else would you like to do?',
   FOLLOW_UP_PROMPT_SHORT: 'What else?',
   FOLLOW_UP_DIRECTION_PROMPT: 'Is this an inbound or outbound route?',
   FOLLOW_UP_STOP_NAME_PROMPT: 'What would you like to call this stop? You can use a city or street name.',
   FOLLOW_UP_STOP_PROMPT: 'What stop number would you like to use by default?',
   FOLLOW_UP_ROUTE_PROMPT: 'What route would you like to add to this stop?',
   FOLLOW_UP_YES_NO_PROMPT: 'Is that correct?',
-  REPROMPT_ADD_ROUTE: 'I did not quite get that. Would you like to add a specific route?',
-  REPROMPT_ADD_STOP: 'I did not quite get that. Would you like to add a specific stop?',
-  REPROMPT_GET_ROUTE: 'I did not quite get that. Would you like to ask for a specific route?',
-  REPROMPT_GET_SUMMARY: 'I did not quite get that. Would you like to get a summary?',
   REPROMPT_REPEAT: 'I did not quite get that. Can you repeat that again?',
   REPROMPT_TRY_AGAIN: 'I did not quite get that. Please try again.',
-  TRY_AGAIN_PROMPT: 'Please try again.',
+  REPROMPT_TRY_AGAIN_SHORT: 'Please try again.',
+  REPROMPT_SORRY: 'Sorry I did not quite get that.',
 
-  STOP_MESSAGE: 'Goodbye.',
+  STOP_MESSAGE: 'OK. Goodbye.',
 
   // Intents
   GET_ROUTE_INTENT: 'GetRouteIntent',
@@ -31,6 +28,13 @@ module.exports = {
   ADD_STOP_INTENT_STREET: 'AddStopIntentStreet',
   DELETE_ROUTE_INTENT: 'DeleteRouteIntent',
   DELETE_STOP_INTENT: 'DeleteStopIntent',
+
+  // Current states
+  ADD_STOP_ID: 'AddStopId',
+  ADD_STOP_DIRECTION: 'AddStopDirection',
+  ADD_STOP_NAME: 'AddStopName',
+  CONFIRM_STOP_NAME: 'ConfirmStopName',
+  ADD_ROUTE_ID: 'AddRouteId',
 
   // Direction
   INBOUND: 1,

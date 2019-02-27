@@ -4,7 +4,7 @@ const levenshtein = require('js-levenshtein');
 // Return index if levenshtein < 3
 // Otherwise return null
 function getBestMatch(stringToMatch, recentStop, stops) {
-  if (stringToMatch === recentStop.stopName) {
+  if (stringToMatch === null || stringToMatch === recentStop.stopName) {
     return -1;
   }
 
