@@ -57,7 +57,7 @@ function getSummary(handlerInput) {
       const nickname = getName(handlerInput);
       sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       if (sessionAttributes.invalidOperation) {
-        const speech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+        const speech = `Stop name ${nickname} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
         const display = `Stop name ${nickname} is invalid.`;
         sessionAttributes.currentState = null;
         attributes.setAttributes(handlerInput, sessionAttributes);
@@ -131,7 +131,7 @@ function getRoute(handlerInput) {
       const nickname = getName(handlerInput);
       sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       if (sessionAttributes.invalidOperation) {
-        const speech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+        const speech = `Stop name ${nickname} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
         const display = `Stop name ${nickname} is invalid.`;
         sessionAttributes.currentState = null;
         attributes.setAttributes(handlerInput, sessionAttributes);
@@ -173,18 +173,32 @@ function addStop(handlerInput) {
               routeIds: []
             };
             sessionAttributes.recent = recent;
-            sessionAttributes.currentState = constants.ADD_STOP_INTENT;
-            attributes.setAttributes(handlerInput, sessionAttributes);
             const display = `Stop (${stopId}) ${stop.attributes.name} selected.`;
             const speech = `Selecting stop ${digitize(stopId)}, ${address(stop.attributes.name)}. ` +
                 `${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
+            const reprompt = `${constants.REPROMPT_SORRY} ${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
+            sessionAttributes.currentState = {
+              state: constants.ADD_STOP_ID,
+              speech: speech,
+              display: display,
+              reprompt: reprompt
+            };
+            attributes.setAttributes(handlerInput, sessionAttributes);
 
-            return response(handlerInput, speech, display, constants.REPROMPT_REPEAT, false);
+            return response(handlerInput, speech, display, reprompt, false);
           } else {
             const display = `Stop ${stopId} invalid.`;
-            const speech = `Stop ${digitize(stopId)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+            const speech = `Stop ${digitize(stopId)} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
+            const reprompt = `${constants.REPROMPT_SORRY} ${speech}`;
+            sessionAttributes.currentState = {
+              state: constants.ADD_STOP_ID,
+              speech: speech,
+              display: display,
+              reprompt: reprompt
+            };
+            attributes.setAttributes(handlerInput, sessionAttributes);
 
-            return response(handlerInput, speech, display, constants.REPROMPT_REPEAT, false);
+            return response(handlerInput, speech, display, reprompt, false);
           }
         });
     })
@@ -203,10 +217,12 @@ function addRoute(handlerInput) {
       const nickname = getName(handlerInput);
       sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       if (sessionAttributes.invalidOperation) {
-        const speech = `Stop name ${nickname} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+        const speech = `Stop name ${nickname} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
         const display = `Stop name ${nickname} is invalid.`;
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
 
-        return response(handlerInput, speech, display, constants.REPROMPT_GET_SUMMARY, false);
+        return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
       }
       const recent = sessionAttributes.recent;
       recent.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
@@ -224,7 +240,7 @@ function addRoute(handlerInput) {
           const display = `Route ${routeId} added.`;
           const speech = `Adding route ${digitize(routeId)} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
 
-          return response(handlerInput, speech, display, constants.REPROMPT_REPEAT, false);
+          return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
         });
     })
     .catch(err => {
@@ -240,7 +256,7 @@ function deleteStop(handlerInput) {
     .then(sessionAttributes => {
       if (sessionAttributes.recent === null) {
         const display = `No stops related to your device.`;
-        const speech = `There are no stops related to your device. ${constants.TRY_AGAIN_PROMPT}`;
+        const speech = `There are no stops related to your device. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
         sessionAttributes.currentState = null;
         attributes.setAttributes(handlerInput, sessionAttributes);
 
@@ -366,7 +382,7 @@ function handleNumberInput(handlerInput) {
 
                 return response(handlerInput, speech, display, reprompt, false);
               }
-              const speech = `Stop ${digitize(number)} is invalid. ${constants.TRY_AGAIN_PROMPT}`;
+              const speech = `Stop ${digitize(number)} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
               const display = `Stop ${number} invalid.`;
               const reprompt = `${constants.REPROMPT_SORRY} ${constants.speech}`;
               sessionAttributes.currentState = {
@@ -430,7 +446,7 @@ function handleNameInput(handlerInput) {
         if (currentState.state === constants.ADD_STOP_NAME) {
           const duplicateName = _.find(sessionAttributes.stops, s => s.stopName === name);
           if (duplicateName) {
-            const speech = `The name ${name} has already been used. ${constants.TRY_AGAIN_PROMPT}`;
+            const speech = `The name ${name} has already been used. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
             const display = `The name ${name} has already been used.`;
             const reprompt = `${constants.REPROMPT_SORRY} ${speech}`;
             sessionAttributes.currentState = {
@@ -496,7 +512,7 @@ function handleDirectionInput(handlerInput) {
             sessionAttributes.stops, s => s.stopId === recent.stopId && s.direction === recent.direction);
           if (duplicateStop) {
             sessionAttributes.recent = null;
-            const speech = `This stop has been added already. ${constants.TRY_AGAIN_PROMPT} ` +
+            const speech = `This stop has been added already. ${constants.REPROMPT_TRY_AGAIN_SHORT} ` +
               `What stop number would you like to use?`;
             const display = 'This stop has been added already.';
             const reprompt = `${constants.REPROMPT_SORRY} What stop number would you like to use?`;
