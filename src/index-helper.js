@@ -178,7 +178,7 @@ function addStop(handlerInput) {
                 `${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
             const reprompt = `${constants.REPROMPT_SORRY} ${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
             sessionAttributes.currentState = {
-              state: constants.ADD_STOP_ID,
+              state: constants.ADD_STOP_DIRECTION,
               speech: speech,
               display: display,
               reprompt: reprompt
@@ -219,6 +219,14 @@ function addRoute(handlerInput) {
       if (sessionAttributes.invalidOperation) {
         const speech = `Stop name ${nickname} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
         const display = `Stop name ${nickname} is invalid.`;
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
+
+        return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
+      }
+      if (!parseInt(routeId)) {
+        const speech = `Route is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
+        const display = `Route ${routeId} is invalid.`;
         sessionAttributes.currentState = null;
         attributes.setAttributes(handlerInput, sessionAttributes);
 
@@ -272,9 +280,10 @@ function deleteStop(handlerInput) {
         return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
       }
       const stopId = sessionAttributes.recent.stopId;
+      const direction = sessionAttributes.recent.direction;
       const stopName = sessionAttributes.recent.stopName;
 
-      return stopRouteDb.remove(deviceId, stopId)
+      return stopRouteDb.remove(deviceId, stopId, direction)
         .then(() => {
           sessionAttributes = deleteAndGetNextRecentStop(sessionAttributes);
           sessionAttributes.currentState = null;
@@ -396,6 +405,20 @@ function handleNumberInput(handlerInput) {
               return response(handlerInput, speech, display, reprompt, false);
             });
         } else if (currentState.state === constants.ADD_ROUTE_ID) {
+          if (!parseInt(number)) {
+            const speech = `Route is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
+            const display = `Route ${number} is invalid.`;
+            const reprompt = `${constants.REPROMPT_SORRY} ${constants.speech}`;
+            sessionAttributes.currentState = {
+              state: constants.ADD_ROUTE_ID,
+              speech: speech,
+              display: display,
+              reprompt: reprompt
+            };
+            attributes.setAttributes(handlerInput, sessionAttributes);
+
+            return response(handlerInput, speech, display, reprompt, false);
+          }
           const recent = sessionAttributes.recent;
           recent.routeIds.push(number);
           recent.lastUpdatedDateTime = timeHelper.getTimeAttributes().currentDateTimeUtc;
@@ -417,7 +440,7 @@ function handleNumberInput(handlerInput) {
             });
         }
 
-        return response(handlerInput, currentState.speech, currentState.display, currentState.reprompt, false);
+        return response(handlerInput, currentState.reprompt, currentState.display, currentState.reprompt, false);
       } else {
         const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
         console.log(errorMessage);
@@ -475,7 +498,7 @@ function handleNameInput(handlerInput) {
           return response(handlerInput, speech, display, reprompt, false);
         }
 
-        return response(handlerInput, currentState.speech, currentState.display, currentState.reprompt, false);
+        return response(handlerInput, currentState.reprompt, currentState.display, currentState.reprompt, false);
       } else {
         const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
         console.log(errorMessage);
@@ -541,7 +564,7 @@ function handleDirectionInput(handlerInput) {
           return response(handlerInput, speech, display, reprompt, false);
         }
 
-        return response(handlerInput, currentState.speech, currentState.display, currentState.reprompt, false);
+        return response(handlerInput, currentState.reprompt, currentState.display, currentState.reprompt, false);
       } else {
         const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
         console.log(errorMessage);
@@ -594,7 +617,7 @@ function handleYesInput(handlerInput) {
             });
         }
 
-        return response(handlerInput, currentState.speech, currentState.display, currentState.reprompt, false);
+        return response(handlerInput, currentState.reprompt, currentState.display, currentState.reprompt, false);
       } else {
         const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
         console.log(errorMessage);
@@ -623,7 +646,7 @@ function handleNoInput(handlerInput) {
           const display = `${constants.FOLLOW_UP_STOP_NAME_PROMPT}`;
           const reprompt = `${constants.REPROMPT_SORRY} ${constants.FOLLOW_UP_STOP_NAME_PROMPT}`;
           sessionAttributes.currentState = {
-            state: constants.CONFIRM_STOP_NAME,
+            state: constants.ADD_STOP_NAME,
             speech: speech,
             display: display,
             reprompt: reprompt
@@ -633,7 +656,7 @@ function handleNoInput(handlerInput) {
           return response(handlerInput, speech, display, reprompt, false);
         }
 
-        return response(handlerInput, currentState.speech, currentState.display, currentState.reprompt, false);
+        return response(handlerInput, currentState.reprompt, currentState.display, currentState.reprompt, false);
       } else {
         const errorMessage = `Unable to recognize what current state (${currentState}) is.`;
         console.log(errorMessage);
@@ -729,7 +752,8 @@ function getNextRecentStop(sessionAttributes) {
     sessionAttributes.index = -1;
   } else {
     const recent = _.max(sessionAttributes.stops, s => moment(s.lastUpdatedDateTime).valueOf());
-    const index = _.find(sessionAttributes.stops, s => recent.stopId === s.stopId && recent.direction === s.direction);
+    const index = _.findIndex(sessionAttributes.stops, s =>
+      recent.stopId === s.stopId && recent.direction === s.direction);
     sessionAttributes.recent = recent;
     sessionAttributes.index = index;
   }

@@ -73,12 +73,13 @@ function retrieve(deviceId, stopId) {
   return db.retrieve(params);
 }
 
-function remove(deviceId, stopId) {
+function remove(deviceId, stopId, direction) {
+  const stopIdDirection = encodeStop(stopId, direction);
   const params = {
     TableName: tableName,
     Key: {
       'deviceId': deviceId,
-      'stopId': stopId
+      'stopId': stopIdDirection
     }
   };
 
