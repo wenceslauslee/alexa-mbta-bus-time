@@ -6,6 +6,7 @@ const moment = require('moment-timezone');
 const prediction = require('./prediction');
 const stopRouteDb = require('./stop-route-db');
 const timeHelper = require('./time-helper');
+const utils = require('./utils');
 const _ = require('underscore');
 
 function callDirectiveService(handlerInput, speechOutput) {
@@ -174,7 +175,7 @@ function addStop(handlerInput) {
             };
             sessionAttributes.recent = recent;
             const display = `Stop (${stopId}) ${stop.attributes.name} selected.`;
-            const speech = `Selecting stop ${digitize(stopId)}, ${address(stop.attributes.name)}. ` +
+            const speech = `Selecting stop ${utils.digitize(stopId)}, ${utils.address(stop.attributes.name)}. ` +
                 `${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
             const reprompt = `${constants.REPROMPT_SORRY} ${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
             sessionAttributes.currentState = {
@@ -188,7 +189,7 @@ function addStop(handlerInput) {
             return response(handlerInput, speech, display, reprompt, false);
           } else {
             const display = `Stop ${stopId} invalid.`;
-            const speech = `Stop ${digitize(stopId)} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
+            const speech = `Stop ${utils.digitize(stopId)} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
             const reprompt = `${constants.REPROMPT_SORRY} ${speech}`;
             sessionAttributes.currentState = {
               state: constants.ADD_STOP_ID,
@@ -201,6 +202,26 @@ function addStop(handlerInput) {
             return response(handlerInput, speech, display, reprompt, false);
           }
         });
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
+}
+
+function listStop(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+
+  return getSessionAttributes(handlerInput, deviceId)
+    .then(sessionAttributes => {
+      const stopNames = _.map(sessionAttributes.stops, s => s.stopName);
+
+      const display = `Existing stops: \n${stopNames.join('\n')}`;
+      const speech = `You have stops ${utils.concatenate(stopNames)}. ${constants.FOLLOW_UP_PROMPT}`;
+      sessionAttributes.currentState = null;
+      attributes.setAttributes(handlerInput, sessionAttributes);
+
+      return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
     })
     .catch(err => {
       console.log(err);
@@ -246,7 +267,7 @@ function addRoute(handlerInput) {
         .then(() => {
           attributes.setAttributes(handlerInput, sessionAttributes);
           const display = `Route ${routeId} added.`;
-          const speech = `Adding route ${digitize(routeId)} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
+          const speech = `Adding route ${utils.digitize(routeId)} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
 
           return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
         });
@@ -319,7 +340,7 @@ function deleteRoute(handlerInput) {
       const recent = sessionAttributes.recent;
       if (recent === null) {
         const display = `Route ${routeId} deleted.`;
-        const speech = `Deleting route ${digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+        const speech = `Deleting route ${utils.digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
         sessionAttributes.currentState = null;
         attributes.setAttributes(handlerInput, sessionAttributes);
 
@@ -327,7 +348,7 @@ function deleteRoute(handlerInput) {
       }
       if (sessionAttributes.currentState && sessionAttributes.currentState.state !== constants.ADD_ROUTE_ID) {
         const display = `Route ${routeId} deleted.`;
-        const speech = `Deleting route ${digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+        const speech = `Deleting route ${utils.digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
         refreshRecent(sessionAttributes);
         sessionAttributes.currentState = null;
         attributes.setAttributes(handlerInput, sessionAttributes);
@@ -343,7 +364,7 @@ function deleteRoute(handlerInput) {
         .then(() => {
           attributes.setAttributes(handlerInput, sessionAttributes);
           const display = `Route ${routeId} deleted.`;
-          const speech = `Deleting route ${digitize(routeId)} from stop ${recent.stopName}. ` +
+          const speech = `Deleting route ${utils.digitize(routeId)} from stop ${recent.stopName}. ` +
             `${constants.FOLLOW_UP_PROMPT_SHORT}`;
 
           return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
@@ -378,7 +399,7 @@ function handleNumberInput(handlerInput) {
                 };
                 sessionAttributes.recent = recent;
                 const display = `Stop (${number}) ${stop.attributes.name} selected.`;
-                const speech = `Selecting stop ${digitize(number)}, ${address(stop.attributes.name)}, ` +
+                const speech = `Selecting stop ${utils.digitize(number)}, ${utils.address(stop.attributes.name)}, ` +
                   `${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
                 const reprompt = `${constants.REPROMPT_SORRY} ${constants.FOLLOW_UP_DIRECTION_PROMPT}`;
                 sessionAttributes.currentState = {
@@ -391,7 +412,7 @@ function handleNumberInput(handlerInput) {
 
                 return response(handlerInput, speech, display, reprompt, false);
               }
-              const speech = `Stop ${digitize(number)} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
+              const speech = `Stop ${utils.digitize(number)} is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
               const display = `Stop ${number} invalid.`;
               const reprompt = `${constants.REPROMPT_SORRY} ${constants.speech}`;
               sessionAttributes.currentState = {
@@ -432,7 +453,7 @@ function handleNumberInput(handlerInput) {
 
           return stopRouteDb.updateEntry(recent)
             .then(() => {
-              const speech = `Adding route ${digitize(number)} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
+              const speech = `Adding route ${utils.digitize(number)} into saved routes. ${constants.FOLLOW_UP_PROMPT}`;
               const display = `Route ${number} added.`;
               attributes.setAttributes(handlerInput, sessionAttributes);
 
@@ -684,16 +705,6 @@ function getSessionAttributes(handlerInput, deviceId) {
   return Promise.resolve(sessionAttributes);
 }
 
-// Interpret as digits.
-function digitize(number) {
-  return `<say-as interpret-as="digits">${number}</say-as>`;
-}
-
-// Interpret as address.
-function address(string) {
-  return `<say-as interpret-as="address">${string}</say-as>`;
-}
-
 // Gets the stop name out of intent slots
 function getName(handlerInput) {
   var nickname = null;
@@ -773,6 +784,7 @@ module.exports = {
   getSummary: getSummary,
   getRoute: getRoute,
   addStop: addStop,
+  listStop: listStop,
   addRoute: addRoute,
   deleteStop: deleteStop,
   deleteRoute: deleteRoute,

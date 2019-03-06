@@ -1,3 +1,4 @@
+Add route during adding stop? Check whether list stops can have empty stops
 Add direction to names utterances/intent
 Major refactoring to consolidate terms and variables/functions
 Come up with testing framework

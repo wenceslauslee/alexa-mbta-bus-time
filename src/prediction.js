@@ -1,6 +1,7 @@
 const mbta = require('./mbta-api');
 const moment = require('moment-timezone');
 const q = require('q');
+const utils = require('./utils');
 const _ = require('underscore');
 
 function getPredictions(stopId, direction, routeIds, currentDate, currentTime) {
@@ -65,23 +66,25 @@ function formatResult(result) {
   if (result.predictions) {
     if (result.predictions.length > 1) {
       return {
-        speech: `The next predicted times for route ${digitize(result.id)} are at ${concatenate(result.predictions)}.`,
-        display: `${result.id}: ${concatenate(result.predictions)}`
+        speech: `The next predicted times for route ${utils.digitize(result.id)} ` +
+          `are at ${utils.concatenate(result.predictions)}.`,
+        display: `${result.id}: ${utils.concatenate(result.predictions)}`
       };
     }
     return {
-      speech: `The next predicted time for route ${digitize(result.id)} is at ${concatenate(result.predictions)}.`,
-      display: `${result.id}: ${concatenate(result.predictions)}`
+      speech: `The next predicted time for route ${utils.digitize(result.id)}` +
+        `is at ${utils.concatenate(result.predictions)}.`,
+      display: `${result.id}: ${utils.concatenate(result.predictions)}`
     };
   }
   return {
-    speech: `The next scheduled trip for route ${digitize(result.id)} is at ${result.scheduled}.`,
+    speech: `The next scheduled trip for route ${utils.digitize(result.id)} is at ${result.scheduled}.`,
     display: `${result.id}: ${result.scheduled}`
   };
 }
 
 function formatResultsWithoutTime(results) {
-  const routeIds = concatenate(_.map(results, r => `${digitize(r.id)}`));
+  const routeIds = utils.concatenate(_.map(results, r => `${utils.digitize(r.id)}`));
 
   return {
     speech: `There are no more scheduled trips for route ${routeIds} today.`,
@@ -91,23 +94,6 @@ function formatResultsWithoutTime(results) {
 
 function formatToLocalTime(isoTime) {
   return moment(isoTime, 'YYYY-MM-DDTHH:mmZZ').tz('America/New_York').format('hh:mm A');
-}
-
-function concatenate(results) {
-  if (results.length === 1) {
-    return results[0];
-  } else if (results.length === 2) {
-    return results.join(' and ');
-  }
-  const excludeLast = _.initial(results);
-  var stringToReturn = excludeLast.join(', ');
-  stringToReturn += ` and ${results[results.length - 1]}`;
-
-  return stringToReturn;
-}
-
-function digitize(number) {
-  return `<say-as interpret-as="digits">${number}</say-as>`;
 }
 
 module.exports = {

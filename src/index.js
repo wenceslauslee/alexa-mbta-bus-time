@@ -64,6 +64,16 @@ const AddStopIntentHandler = {
   }
 };
 
+const ListStopIntentHandler = {
+  canHandle(handlerInput) {
+    return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
+      handlerInput.requestEnvelope.request.intent.name === constants.LIST_STOP_INTENT;
+  },
+  handle(handlerInput) {
+    return indexHelper.listStop(handlerInput);
+  }
+};
+
 const AddRouteIntentHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'IntentRequest' &&
@@ -260,6 +270,7 @@ exports.handler = skillBuilder
     GetSummaryIntentHandler,
     GetSummaryIntentStreetHandler,
     AddStopIntentHandler,
+    ListStopIntentHandler,
     AddRouteIntentHandler,
     AddRouteIntentStreetHandler,
     DeleteStopIntentHandler,
