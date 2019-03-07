@@ -42,18 +42,7 @@ function getSummary(handlerInput) {
       refreshRecent(sessionAttributes);
       const recent = sessionAttributes.recent;
       if (!recent) {
-        const display = `No stops related to this device.`;
-        const speech = `We could not find any data related to your device. ${constants.FOLLOW_UP_STOP_PROMPT}`;
-        const reprompt = `${constants.REPROMPT_SORRY} ${speech}`;
-        sessionAttributes.currentState = {
-          state: constants.ADD_STOP_ID,
-          speech: speech,
-          display: display,
-          reprompt: reprompt
-        };
-        attributes.setAttributes(handlerInput, sessionAttributes);
-
-        return response(handlerInput, speech, display, reprompt, false);
+        return getNoStopPrompt(handlerInput, sessionAttributes);
       }
       const nickname = getName(handlerInput);
       sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
@@ -116,18 +105,7 @@ function getRoute(handlerInput) {
       refreshRecent(sessionAttributes);
       const recent = sessionAttributes.recent;
       if (!recent) {
-        const display = `No stops related to this device.`;
-        const speech = `We could not find any data related to your device. ${constants.FOLLOW_UP_STOP_PROMPT}`;
-        const reprompt = `${constants.REPROMPT_SORRY} ${speech}`;
-        sessionAttributes.currentState = {
-          state: constants.ADD_STOP_ID,
-          speech: speech,
-          display: display,
-          reprompt: reprompt
-        };
-        attributes.setAttributes(handlerInput, sessionAttributes);
-
-        return response(handlerInput, speech, display, reprompt, false);
+        return getNoStopPrompt(handlerInput, sessionAttributes);
       }
       const nickname = getName(handlerInput);
       sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
@@ -214,6 +192,14 @@ function listStop(handlerInput) {
 
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
+      if (!sessionAttributes.recent) {
+        const display = `No stops related to your device.`;
+        const speech = `There are no stops related to your device. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
+        sessionAttributes.currentState = null;
+        attributes.setAttributes(handlerInput, sessionAttributes);
+
+        return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
+      }
       const stopNames = _.map(sessionAttributes.stops, s => s.stopName);
 
       const display = `Existing stops: \n${stopNames.join('\n')}`;
@@ -235,6 +221,9 @@ function addRoute(handlerInput) {
 
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
+      if (!sessionAttributes.recent) {
+        return getNoStopPrompt(handlerInput, sessionAttributes);
+      }
       const nickname = getName(handlerInput);
       sessionAttributes = getSpecificLocation(sessionAttributes, nickname);
       if (sessionAttributes.invalidOperation) {
@@ -283,7 +272,7 @@ function deleteStop(handlerInput) {
 
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
-      if (sessionAttributes.recent === null) {
+      if (!sessionAttributes.recent) {
         const display = `No stops related to your device.`;
         const speech = `There are no stops related to your device. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
         sessionAttributes.currentState = null;
@@ -703,6 +692,22 @@ function getSessionAttributes(handlerInput, deviceId) {
       });
   }
   return Promise.resolve(sessionAttributes);
+}
+
+// Prompt when no stops are setup
+function getNoStopPrompt(handlerInput, sessionAttributes) {
+  const display = `No stops related to this device.`;
+  const speech = `We could not find any data related to your device. ${constants.FOLLOW_UP_STOP_PROMPT}`;
+  const reprompt = `${constants.REPROMPT_SORRY} ${speech}`;
+  sessionAttributes.currentState = {
+    state: constants.ADD_STOP_ID,
+    speech: speech,
+    display: display,
+    reprompt: reprompt
+  };
+  attributes.setAttributes(handlerInput, sessionAttributes);
+
+  return response(handlerInput, speech, display, reprompt, false);
 }
 
 // Gets the stop name out of intent slots
