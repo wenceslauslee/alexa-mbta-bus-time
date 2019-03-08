@@ -1,40 +1,95 @@
 const mbta = require('./mbta-api');
 const moment = require('moment-timezone');
 const q = require('q');
+const utils = require('./utils');
 const _ = require('underscore');
 
-function getPredictions(routeIds, stopId, currentDate, currentTime) {
+function getPredictions(stopId, direction, routeIds, currentDate, currentTime) {
   const routePredictions = _.map(routeIds, async (routeId) => {
-    const predictionPromise = mbta.getPredictions(routeId, stopId);
-    const earliestSchedulePromise = mbta.getEarliestSchedule(routeId, stopId, currentDate, currentTime);
+    const predictionPromise = mbta.getPredictions(stopId, direction, routeId);
+    const earliestSchedulePromise = mbta.getEarliestSchedule(stopId, direction, routeId, currentDate, currentTime);
 
     return q.all([predictionPromise, earliestSchedulePromise])
       .then((results) => {
+        const result = {
+          id: routeId
+        };
+
         if (results[0].length === 0) {
-          if (!results[1]) {
-            return `There are no more scheduled trips for route ${routeId} today.`;
+          if (results[1]) {
+            result.scheduled = formatToLocalTime(results[1]);
           }
-          return `The next scheduled trip for route ${routeId} is at ${formatToLocalTime(results[1])}.`;
+          return result;
         }
 
-        const formattedTimeArray = _.map(results[0], prediction => {
+        var formattedTimeArray = _.map(results[0], prediction => {
           return formatToLocalTime(prediction);
         });
-        const formattedTime = formattedTimeArray.join(' and ');
-
-        if (formattedTimeArray.length === 1) {
-          return `The next predicted time for route ${routeId} is at ${formattedTime}.`
+        if (formattedTimeArray.length > 3) {
+          formattedTimeArray = formattedTimeArray.slice(0, 3);
         }
+        result.predictions = formattedTimeArray;
 
-        return `The next predicted times for route ${routeId} are at ${formattedTime}.`
+        return result;
       });
-
   });
 
   return q.all(routePredictions)
     .then(results => {
-      return results.join(' ');
+      const routesWithTime = _.filter(results, r => r.predictions || r.scheduled);
+      const routesWithoutTime = _.filter(results, r => !r.predictions && !r.scheduled);
+
+      const routesWithTimeSpeech = _.map(routesWithTime, r => formatResult(r).speech).join(' ');
+      const routesWithTimeDisplay = _.map(routesWithTime, r => formatResult(r).display).join('\n');
+      const routesWithoutTimeSpeech = formatResultsWithoutTime(routesWithoutTime).speech;
+      const routesWithoutTimeDisplay = formatResultsWithoutTime(routesWithoutTime).display;
+
+      if (routesWithTime.length === 0) {
+        return {
+          speech: routesWithoutTimeSpeech,
+          display: routesWithoutTimeDisplay
+        };
+      } else if (routesWithoutTime.length === 0) {
+        return {
+          speech: routesWithTimeSpeech,
+          display: routesWithTimeDisplay
+        };
+      }
+      return {
+        speech: routesWithTimeSpeech + ' ' + routesWithoutTimeSpeech,
+        display: routesWithTimeDisplay + '\n' + routesWithoutTimeDisplay
+      };
     });
+}
+
+function formatResult(result) {
+  if (result.predictions) {
+    if (result.predictions.length > 1) {
+      return {
+        speech: `The next predicted times for route ${utils.digitize(result.id)} ` +
+          `are at ${utils.concatenate(result.predictions)}.`,
+        display: `${result.id}: ${utils.concatenate(result.predictions)}`
+      };
+    }
+    return {
+      speech: `The next predicted time for route ${utils.digitize(result.id)}` +
+        `is at ${utils.concatenate(result.predictions)}.`,
+      display: `${result.id}: ${utils.concatenate(result.predictions)}`
+    };
+  }
+  return {
+    speech: `The next scheduled trip for route ${utils.digitize(result.id)} is at ${result.scheduled}.`,
+    display: `${result.id}: ${result.scheduled}`
+  };
+}
+
+function formatResultsWithoutTime(results) {
+  const routeIds = utils.concatenate(_.map(results, r => `${utils.digitize(r.id)}`));
+
+  return {
+    speech: `There are no more scheduled trips for route ${routeIds} today.`,
+    display: _.map(results, r => `${r.id}: None`).join('\n')
+  };
 }
 
 function formatToLocalTime(isoTime) {

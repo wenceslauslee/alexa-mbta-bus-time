@@ -1,0 +1,34 @@
+Test plan
+
+// Start fresh and setup stop
+Get summary
+one
+inbound
+Newton
+yes
+one
+Get summary
+Get summary at newton
+Get summary at blabla
+
+// Adding stop
+Add stop two
+inbound
+boston
+yes
+two
+get summary
+get summary at boston
+get summary at newton
+
+// Add route
+Add route three
+get summary
+
+// Delete route
+Delete route three
+get summary
+
+// Delete stop
+get summary
+exit

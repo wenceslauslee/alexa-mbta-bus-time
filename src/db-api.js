@@ -1,7 +1,7 @@
-const AWS = require("aws-sdk");
+const AWS = require('aws-sdk');
 
 AWS.config.update({
-  region: "us-east-1"
+  region: 'us-east-1'
 });
 
 const docClient = new AWS.DynamoDB.DocumentClient();
@@ -19,7 +19,7 @@ function create(params) {
     });
 }
 
-function query(params) {  
+function query(params) {
   console.log(params);
 
   return docClient.query(params).promise()
@@ -36,7 +36,7 @@ function query(params) {
 
 function retrieve(params) {
   console.log(params);
-  
+
   return docClient.get(params).promise()
     .then(data => {
       console.log('DB data retrieval successful');
@@ -62,7 +62,7 @@ function remove(params) {
     });
 }
 
-function update(params) {  
+function update(params) {
   console.log(params);
 
   return docClient.update(params).promise()

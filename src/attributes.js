@@ -2,8 +2,6 @@ const _ = require('underscore');
 
 function clearAttributes(handlerInput) {
   handlerInput.attributesManager.setSessionAttributes({});
-
-  return;
 }
 
 function getAttributes(handlerInput) {
@@ -11,7 +9,7 @@ function getAttributes(handlerInput) {
 }
 
 function setAttributes(handlerInput, attributesToSet) {
-  const attributesManager = handlerInput.attributesManager
+  const attributesManager = handlerInput.attributesManager;
   var existingAttributes = attributesManager.getSessionAttributes();
 
   if (_.isEmpty(existingAttributes)) {
@@ -22,8 +20,6 @@ function setAttributes(handlerInput, attributesToSet) {
     console.log(`Attributes set to ${JSON.stringify(existingAttributes, null, 2)}`);
     attributesManager.setSessionAttributes(existingAttributes);
   }
-
-  return;
 }
 
 module.exports = {
