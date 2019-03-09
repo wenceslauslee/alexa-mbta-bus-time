@@ -16,7 +16,7 @@ function getPredictions(stopId, direction, routeIds, currentDate, currentTime) {
         };
 
         if (results[0].length === 0) {
-          if (results[1]) {
+          if (results[1] !== null) {
             result.scheduled = formatToLocalTime(results[1]);
           }
           return result;
@@ -63,7 +63,7 @@ function getPredictions(stopId, direction, routeIds, currentDate, currentTime) {
 }
 
 function formatResult(result) {
-  if (result.predictions) {
+  if (result.predictions !== null) {
     if (result.predictions.length > 1) {
       return {
         speech: `The next predicted times for route ${utils.digitize(result.id)} ` +

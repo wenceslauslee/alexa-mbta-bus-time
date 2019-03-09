@@ -231,7 +231,7 @@ function addRoute(handlerInput) {
 
         return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
       }
-      if (!parseInt(routeId)) {
+      if (isNaN(parseInt(routeId))) {
         const speech = `Route is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
         const display = `Route ${routeId} is invalid.`;
         sessionAttributes.currentState = null;
@@ -324,7 +324,7 @@ function deleteRoute(handlerInput) {
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
       const recent = sessionAttributes.recent;
-      if (recent === null) {
+      if (!recent) {
         const display = `Route ${routeId} deleted.`;
         const speech = `Deleting route ${utils.digitize(routeId)}. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
         sessionAttributes.currentState = null;
@@ -412,7 +412,7 @@ function handleNumberInput(handlerInput) {
               return response(handlerInput, speech, display, reprompt, false);
             });
         } else if (currentState.state === constants.ADD_ROUTE_ID) {
-          if (!parseInt(number)) {
+          if (isNaN(parseInt(number))) {
             const speech = `Route is invalid. ${constants.REPROMPT_TRY_AGAIN_SHORT}`;
             const display = `Route ${number} is invalid.`;
             const reprompt = `${constants.REPROMPT_SORRY} ${constants.speech}`;
@@ -768,7 +768,7 @@ function deleteAndGetNextRecentStop(sessionAttributes) {
 // Clears recent entry and gets the saved recent stop.
 function refreshRecent(sessionAttributes) {
   const recent = sessionAttributes.recent;
-  if (recent && (!recent.stopName || !recent.stopId || recent.direction !== 0) &&
+  if (recent && (!recent.stopName || !recent.stopId || recent.direction !== null) &&
     (sessionAttributes.currentState && sessionAttributes.currentState.state !== constants.ADD_ROUTE_ID)) {
     getNextRecentStop(sessionAttributes);
   }
