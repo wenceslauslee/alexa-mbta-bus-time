@@ -2,11 +2,11 @@ Test plan (need to code all these out)
 
 * No known state with no stops (done)
 * No known state with stops (done)
-* Add stop id
-* Add stop direction
-* Add stop name
-* Yes/No situation
-* Add route id
+* Add stop  (done)
+* Add stop direction (done)
+* Add stop name (done)
+* Yes/No situation (done)
+* Add route id (done)
 
 GetSummary
 GetRoute

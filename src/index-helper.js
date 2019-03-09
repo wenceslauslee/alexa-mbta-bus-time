@@ -192,13 +192,9 @@ function listStop(handlerInput) {
 
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
+      refreshRecent(sessionAttributes);
       if (!sessionAttributes.recent) {
-        const display = `No stops related to your device.`;
-        const speech = `There are no stops related to your device. ${constants.FOLLOW_UP_PROMPT_SHORT}`;
-        sessionAttributes.currentState = null;
-        attributes.setAttributes(handlerInput, sessionAttributes);
-
-        return response(handlerInput, speech, display, constants.REPROMPT_TRY_AGAIN, false);
+        return getNoStopPrompt(handlerInput, sessionAttributes);
       }
       const stopNames = _.map(sessionAttributes.stops, s => s.stopName);
 
@@ -221,6 +217,7 @@ function addRoute(handlerInput) {
 
   return getSessionAttributes(handlerInput, deviceId)
     .then(sessionAttributes => {
+      refreshRecent(sessionAttributes);
       if (!sessionAttributes.recent) {
         return getNoStopPrompt(handlerInput, sessionAttributes);
       }
@@ -681,6 +678,23 @@ function handleNoInput(handlerInput) {
     });
 }
 
+function handleHelpInput(handlerInput) {
+  const deviceId = handlerInput.requestEnvelope.context.System.device.deviceId;
+
+  return getSessionAttributes(handlerInput, deviceId)
+    .then(sessionAttributes => {
+      refreshRecent(sessionAttributes);
+      sessionAttributes.currentState = null;
+      attributes.setAttributes(handlerInput, sessionAttributes);
+
+      return response(handlerInput, constants.HELP_PROMPT, constants.HELP_PROMPT, constants.REPROMPT_TRY_AGAIN, false);
+    })
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
+}
+
 // Gets session attributes from request, otherwise reads from DB.
 function getSessionAttributes(handlerInput, deviceId) {
   const sessionAttributes = attributes.getAttributes(handlerInput);
@@ -754,7 +768,8 @@ function deleteAndGetNextRecentStop(sessionAttributes) {
 // Clears recent entry and gets the saved recent stop.
 function refreshRecent(sessionAttributes) {
   const recent = sessionAttributes.recent;
-  if (recent && (!recent.stopName || !recent.stopId || !recent.direction)) {
+  if (recent && (!recent.stopName || !recent.stopId || recent.direction !== 0) &&
+    (sessionAttributes.currentState && sessionAttributes.currentState.state !== constants.ADD_ROUTE_ID)) {
     getNextRecentStop(sessionAttributes);
   }
 
@@ -797,5 +812,6 @@ module.exports = {
   handleNameInput: handleNameInput,
   handleDirectionInput: handleDirectionInput,
   handleYesInput: handleYesInput,
-  handleNoInput: handleNoInput
+  handleNoInput: handleNoInput,
+  handleHelpInput: handleHelpInput
 };
