@@ -1,7 +1,4 @@
-Add direction to names utterances/intent
-Major refactoring to consolidate terms and variables/functions
 Come up with testing framework
-Record utterance trail
 
 rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTimeDev --zip-file fileb://bus-time.zip
-rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTimeProd --zip-file fileb://bus-time.zip
+rm -rf bus-time.zip && zip -r bus-time.zip * && aws lambda update-function-code --function-name MbtaBusTime --zip-file fileb://bus-time.zip

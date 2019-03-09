@@ -1,34 +1,18 @@
-Test plan
+Test plan (need to code all these out)
 
-// Start fresh and setup stop
-Get summary
-one
-inbound
-Newton
-yes
-one
-Get summary
-Get summary at newton
-Get summary at blabla
+* No known state with no stops (done)
+* No known state with stops (done)
+* Add stop id
+* Add stop direction
+* Add stop name
+* Yes/No situation
+* Add route id
 
-// Adding stop
-Add stop two
-inbound
-boston
-yes
-two
-get summary
-get summary at boston
-get summary at newton
-
-// Add route
-Add route three
-get summary
-
-// Delete route
-Delete route three
-get summary
-
-// Delete stop
-get summary
-exit
+GetSummary
+GetRoute
+AddStop
+ListStop
+AddRoute
+DeleteStop
+DeleteRoute
+Number/City/Street/Direction/Yes/No/Stop/Help/Random

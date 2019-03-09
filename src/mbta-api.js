@@ -44,7 +44,6 @@ function getPredictions(stopId, direction, routeId) {
       const predictions = _.map(response.data, data => {
         return data.attributes.arrival_time;
       });
-      console.log('Predictions are: ' + predictions);
 
       return predictions;
     })
