@@ -20,7 +20,7 @@ function getEarliestSchedule(stopId, direction, routeId, date, time) {
         return null;
       }
 
-      const earliestScheduledTime = data[0].attributes.arrival_time;
+      const earliestScheduledTime = data[0].attributes.departure_time;
       console.log('Earliest scheduled time is: ' + earliestScheduledTime);
 
       return earliestScheduledTime;
@@ -42,7 +42,7 @@ function getPredictions(stopId, direction, routeId) {
   })
     .then(response => {
       const predictions = _.map(response.data, data => {
-        return data.attributes.arrival_time;
+        return data.attributes.departure_time;
       });
 
       return predictions;

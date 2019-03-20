@@ -72,7 +72,7 @@ function formatResult(result) {
       };
     }
     return {
-      speech: `The next predicted time for route ${utils.digitize(result.id)}` +
+      speech: `The next predicted time for route ${utils.digitize(result.id)} ` +
         `is at ${utils.concatenate(result.predictions)}.`,
       display: `${result.id}: ${utils.concatenate(result.predictions)}`
     };
