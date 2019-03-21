@@ -41,9 +41,11 @@ function getPredictions(stopId, direction, routeId) {
     json: true
   })
     .then(response => {
-      const predictions = _.map(response.data, data => {
+      var predictions = _.map(response.data, data => {
         return data.attributes.departure_time;
       });
+      predictions = _.reject(predictions, p => p === null);
+      console.log('Earliest prediction times are: ' + predictions.join(', '));
 
       return predictions;
     })
