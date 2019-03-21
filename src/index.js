@@ -2,9 +2,6 @@ const Alexa = require('ask-sdk-core');
 const constants = require('./constants');
 const indexHelper = require('./index-helper');
 
-const HELP_MESSAGE = 'You can say where is route 11, or, you can say give me a summary.';
-const HELP_REPROMPT = 'What can I help you with?';
-
 const LaunchRequestHandler = {
   canHandle(handlerInput) {
     return handlerInput.requestEnvelope.request.type === 'LaunchRequest';
@@ -180,12 +177,7 @@ const HelpIntentHandler = {
       handlerInput.requestEnvelope.request.intent.name === 'AMAZON.HelpIntent';
   },
   handle(handlerInput) {
-    return handlerInput.responseBuilder
-      .speak(HELP_MESSAGE)
-      .withSimpleCard(constants.SKILL_NAME, HELP_MESSAGE)
-      .reprompt(HELP_REPROMPT)
-      .withShouldEndSession(false)
-      .getResponse();
+    return indexHelper.handleHelpInput(handlerInput);
   }
 };
 
@@ -223,6 +215,10 @@ const FallbackIntentHandler = {
       handlerInput.requestEnvelope.request.intent.name === 'AMAZON.FallbackIntent';
   },
   handle(handlerInput) {
+    const sessionAttributes = handlerInput.attributesManager.getSessionAttributes();
+    sessionAttributes.currentState = null;
+    handlerInput.attributesManager.setSessionAttributes(sessionAttributes);
+
     return handlerInput.responseBuilder
       .speak(constants.REPROMPT_TRY_AGAIN)
       .withSimpleCard(constants.SKILL_NAME, constants.REPROMPT_TRY_AGAIN)
