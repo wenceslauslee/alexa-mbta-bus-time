@@ -12,7 +12,9 @@ function getPredictions(stopId, direction, routeIds, currentDate, currentTime) {
     return q.all([predictionPromise, earliestSchedulePromise])
       .then((results) => {
         const result = {
-          id: routeId
+          id: routeId,
+          scheduled: null,
+          predictions: null
         };
 
         if (results[0].length === 0) {
