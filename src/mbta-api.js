@@ -72,7 +72,7 @@ function getStop(stopId) {
   };
   console.log(`Stop request is: ${JSON.stringify(req, null, 2)}`);
 
-  return request()
+  return request(req)
     .then(response => {
       console.log(`Stop response is: ${JSON.stringify(response, null, 2)}`);
 
