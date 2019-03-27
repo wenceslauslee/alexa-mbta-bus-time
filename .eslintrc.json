@@ -5,5 +5,10 @@
       "max-len": [ 2, { "code": 120 } ],
       "space-before-function-paren": [ 0, "never" ],
       "key-spacing": [ 2, { "afterColon": true } ]
+    },
+    "env": {
+      "commonjs": true,
+      "node": true,
+      "mocha": true
     }
 }

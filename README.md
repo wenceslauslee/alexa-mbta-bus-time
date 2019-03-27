@@ -31,7 +31,7 @@ Go to the Alexa App on your device and enable skill "Bus Time".
 
 Code requires [Node.js](https://nodejs.org/) v6+ to build.
 
-Install the dependencies and devDependencies and start the server.
+Install the dependencies and devDependencies and deploy the lambda.
 
 ```sh
 $ cd alexa-mbta-bus-time

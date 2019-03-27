@@ -1,0 +1,47 @@
+language: node_js
+node_js:
+  - "10"
+script:
+  - npm test
+  - npm run style
+notifications:
+  email:
+    recipients:
+     - wenceslauslee@gmail.com
+    on_success: change  # default: change
+    on_failure: always  # default: always
+deploy:
+  - provider: lambda
+    function_name: MbtaBusTime
+    region: us-east-1
+    role: arn:aws:iam::262375365616:role/service-role/LambdaExecutionRole
+    runtime: nodejs8.10
+    module_name: src/index
+    handler_name: handler
+    description: Lambda function to get MBTA bus time for Alexa Skill
+    memory_size: 256
+    access_key_id:
+      secure: jSGcXeq9coVUWFihjOynu+Ki710FuQJvSEYaSVeL4yYNUOEWXVseI/Fx2++4voRHaixPdoTOxBuAyMv7GxzrD9nq55PKX8zIJ0gWzgdiSBITL/p2GVMh3azViMxfFszoR93F7LPpGGskup7nbaPfX5ZgWJyTvVp0GxNqGXFBGPxtF3p4x1qYIz3bwc3OwDQhJsglNkr40d78rFA7SbNhet3vUmjP7YfMkP4ObKFlOCkx5hOlmfXCHfe3to229JdQVY1LkH3ZjXuxT69h/fCUz8UXp3tkK35lcIp+N/ke8pwt5bf0Wvk1y/yaWqzEptTxcK12lQu+ZHShCcuXNRn56uA+KoKg4EWuX/hmLcduPtAIxttRvuORzRWB+U/xnl8zZJuMeZXtgEY3WoBaL9vucP+hVL42pZiARsKBq2w3wBh/+A0Xh54zbjPaXeh12FCP5rq4ldaHaSXAb8aAJxGFtFaP4kmJTENb07MkXAA9kFxi9+d27VIkZLhaOAJrWRIOLVZT4ajmi3RZAZM4RjhMlr9EAl0JmCUN4UKLhRzXwF95OFL0mq3n6BUvfpq+JyCx2TDiT05PwojKKKkIQer0EknbcLig2Ae0Hu0Wu5TxMjIx5Z4ucaYteDXVgumb1XWJPy+iyxi5dTX8pKMjl4ph2sehOmjhGNk/DPg4NQZNKoU=
+    secret_access_key:
+      secure: c0V1heArt2P3/AOvZcj1TUfgqt9P1tVd83OVkvvff5m7vO5LMuspyrd3ONxIcxx21y9La7As2XvDdwEDiXD5Q5L7JktWyhJ/8/wuJ0G9HqpQLO9cuwpncS2AkBUtVeuv+NzCzDC14tjeuvZDZONfBEl7tQBEWm7QCHuuQoTQZ8cBvkXuwGhiL2GwDHgq4+b4z57aUafcpMQk0hbr67n1E+wdXKf2NwE8gbWICYrtapa8Dt9egrsmLZBWOBVToVrxyrCr+qHSGaic4Jzs8jA271RQ+ufNA8or/QdoGDI8HiMUEVThPzMfu8oiPMk/Bdv2eC9fe+y9eGmspscmLRyEKunwFFp1fJTbnrl1dchNYQsdI5J1/tdRLMdYrNdXgj8eVkiXOinKvEQDLjinVywB5GsIvFktuAW4oIZY8ll1n1b0/fpH5NimmKpMEMElAcqQIeH275CuZ/Cs1XyUpCQ/gXKZCKpxIY3EVVEIsDfA2fvSozeAFX6hzr/qw4VPEcVsNxneetQaARYuzlEi2iA6Ib2hSXdO9IcDZ/6r9nO4Tj3uaOqhyRW5WKyezCPYYGCXeiZfN1zmIFbdPNIySiox1IPVIM47cZ/tpnVrnaSSeNv3noH6xuNL99o+m/MxXAJNd1zp/9Mf1QlBVlhfelJSkue1fetvqHJtBCOBojwqRQg=
+    environment_variables:
+      secure: MKi7V77k7eAaI4LO1sj4BVl1cCGFc8c8IxCYX9nfY23dgriONu9RiarKkE8GSGOk44GH0bBDjga3SbG29WcLbkPmyTvxeWJeJcKS2wE3cfOqX7/cqakqG0OD76rFEypp3c1//l+ZCaXhWaVUjoRLsoVz0G3NEnS/y6aMlejbBiYk2HLdX/fvZaBDE1AI7m+SOJE0ppglfO86jDKIsBfaw3w8h0TR0VdHxTQU5aOSAIBvT1GrP1pr7/7EcDyqM8NCJeLShCU+LMOjxNmU1fdZXUDB9zoW0rJhtITYqARIv/sNISlFMdKicwwFJYQ8k09UebfZ8JAq7OEMl3Bd3n/zfCHivuaJJlLgSWC6UXwwbD0s2To/+Bkdx6mo7pQ7hS6z07YLoYHiMRWRKm6mfxbEY664Q85nhbkZ/L0lhHdeQRZZDE0rsmYa9FI3Kh1UxL7K5RkeuRPXG+E5r1MQJKcJbSKiLI7kQ0F6xO4QeOpwXKvL4KnjjKQ8yLyO4mhk+UHw1Oih9IwxZlZhAx/4b1pVcMFI3yRNyWpRqpoqLKouCvEN/3fUh4vjzG/anqkVQufwVc/E5A88SaG/gP/frzKqg5X/NE4LA4giBv/jvGvQ7xQEiuUR3p9207Y2Jo/7E4QADNA4aEP6NCicSehnq58DiphOTLYRfz2rBElPPJZ1Z2c=
+    on:
+      branch: master
+  - provider: lambda
+    function_name: MbtaBusTimeDev
+    region: us-east-1
+    role: arn:aws:iam::262375365616:role/service-role/LambdaExecutionRole
+    runtime: nodejs8.10
+    module_name: src/index
+    handler_name: handler
+    description: Lambda function DEV to get MBTA bus time for Alexa Skill
+    memory_size: 256
+    access_key_id:
+      secure: jSGcXeq9coVUWFihjOynu+Ki710FuQJvSEYaSVeL4yYNUOEWXVseI/Fx2++4voRHaixPdoTOxBuAyMv7GxzrD9nq55PKX8zIJ0gWzgdiSBITL/p2GVMh3azViMxfFszoR93F7LPpGGskup7nbaPfX5ZgWJyTvVp0GxNqGXFBGPxtF3p4x1qYIz3bwc3OwDQhJsglNkr40d78rFA7SbNhet3vUmjP7YfMkP4ObKFlOCkx5hOlmfXCHfe3to229JdQVY1LkH3ZjXuxT69h/fCUz8UXp3tkK35lcIp+N/ke8pwt5bf0Wvk1y/yaWqzEptTxcK12lQu+ZHShCcuXNRn56uA+KoKg4EWuX/hmLcduPtAIxttRvuORzRWB+U/xnl8zZJuMeZXtgEY3WoBaL9vucP+hVL42pZiARsKBq2w3wBh/+A0Xh54zbjPaXeh12FCP5rq4ldaHaSXAb8aAJxGFtFaP4kmJTENb07MkXAA9kFxi9+d27VIkZLhaOAJrWRIOLVZT4ajmi3RZAZM4RjhMlr9EAl0JmCUN4UKLhRzXwF95OFL0mq3n6BUvfpq+JyCx2TDiT05PwojKKKkIQer0EknbcLig2Ae0Hu0Wu5TxMjIx5Z4ucaYteDXVgumb1XWJPy+iyxi5dTX8pKMjl4ph2sehOmjhGNk/DPg4NQZNKoU=
+    secret_access_key:
+      secure: c0V1heArt2P3/AOvZcj1TUfgqt9P1tVd83OVkvvff5m7vO5LMuspyrd3ONxIcxx21y9La7As2XvDdwEDiXD5Q5L7JktWyhJ/8/wuJ0G9HqpQLO9cuwpncS2AkBUtVeuv+NzCzDC14tjeuvZDZONfBEl7tQBEWm7QCHuuQoTQZ8cBvkXuwGhiL2GwDHgq4+b4z57aUafcpMQk0hbr67n1E+wdXKf2NwE8gbWICYrtapa8Dt9egrsmLZBWOBVToVrxyrCr+qHSGaic4Jzs8jA271RQ+ufNA8or/QdoGDI8HiMUEVThPzMfu8oiPMk/Bdv2eC9fe+y9eGmspscmLRyEKunwFFp1fJTbnrl1dchNYQsdI5J1/tdRLMdYrNdXgj8eVkiXOinKvEQDLjinVywB5GsIvFktuAW4oIZY8ll1n1b0/fpH5NimmKpMEMElAcqQIeH275CuZ/Cs1XyUpCQ/gXKZCKpxIY3EVVEIsDfA2fvSozeAFX6hzr/qw4VPEcVsNxneetQaARYuzlEi2iA6Ib2hSXdO9IcDZ/6r9nO4Tj3uaOqhyRW5WKyezCPYYGCXeiZfN1zmIFbdPNIySiox1IPVIM47cZ/tpnVrnaSSeNv3noH6xuNL99o+m/MxXAJNd1zp/9Mf1QlBVlhfelJSkue1fetvqHJtBCOBojwqRQg=
+    environment_variables:
+      secure: MKi7V77k7eAaI4LO1sj4BVl1cCGFc8c8IxCYX9nfY23dgriONu9RiarKkE8GSGOk44GH0bBDjga3SbG29WcLbkPmyTvxeWJeJcKS2wE3cfOqX7/cqakqG0OD76rFEypp3c1//l+ZCaXhWaVUjoRLsoVz0G3NEnS/y6aMlejbBiYk2HLdX/fvZaBDE1AI7m+SOJE0ppglfO86jDKIsBfaw3w8h0TR0VdHxTQU5aOSAIBvT1GrP1pr7/7EcDyqM8NCJeLShCU+LMOjxNmU1fdZXUDB9zoW0rJhtITYqARIv/sNISlFMdKicwwFJYQ8k09UebfZ8JAq7OEMl3Bd3n/zfCHivuaJJlLgSWC6UXwwbD0s2To/+Bkdx6mo7pQ7hS6z07YLoYHiMRWRKm6mfxbEY664Q85nhbkZ/L0lhHdeQRZZDE0rsmYa9FI3Kh1UxL7K5RkeuRPXG+E5r1MQJKcJbSKiLI7kQ0F6xO4QeOpwXKvL4KnjjKQ8yLyO4mhk+UHw1Oih9IwxZlZhAx/4b1pVcMFI3yRNyWpRqpoqLKouCvEN/3fUh4vjzG/anqkVQufwVc/E5A88SaG/gP/frzKqg5X/NE4LA4giBv/jvGvQ7xQEiuUR3p9207Y2Jo/7E4QADNA4aEP6NCicSehnq58DiphOTLYRfz2rBElPPJZ1Z2c=
+    on:
+      branch: development
