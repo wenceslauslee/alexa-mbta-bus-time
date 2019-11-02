@@ -15,7 +15,7 @@ deploy:
     function_name: MbtaBusTime
     region: us-east-1
     role: arn:aws:iam::262375365616:role/service-role/LambdaExecutionRole
-    runtime: nodejs8.10
+    runtime: nodejs10.x
     module_name: src/index
     handler_name: handler
     description: Lambda function to get MBTA bus time for Alexa Skill
@@ -32,7 +32,7 @@ deploy:
     function_name: MbtaBusTimeDev
     region: us-east-1
     role: arn:aws:iam::262375365616:role/service-role/LambdaExecutionRole
-    runtime: nodejs8.10
+    runtime: nodejs10.x
     module_name: src/index
     handler_name: handler
     description: Lambda function DEV to get MBTA bus time for Alexa Skill
