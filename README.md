@@ -13,14 +13,14 @@ Please look up your bus stop ID via https://www.mbta.com/schedules/bus. The ID w
 
 ### How to use skill (example utterances)
 
-> Add stop 123  
-> Add route 456    
-> Get summary  
-> Give me a summary  
-> Get summary at "Home"  
-> Get route 456  
-> Get route 456 at "Home"  
-> Delete stop  
+> Add stop 123
+> Add route 456
+> Get summary
+> Give me a summary
+> Get summary at "Home"
+> Get route 456
+> Get route 456 at "Home"
+> Delete stop
 > Delete route 456
 
 ### Installation
@@ -29,7 +29,7 @@ Go to the Alexa App on your device and enable skill "Bus Time".
 
 ### Building
 
-Code requires [Node.js](https://nodejs.org/) v6+ to build.
+Code requires [Node.js](https://nodejs.org/) v10+ to build.
 
 Install the dependencies and devDependencies and deploy the lambda.
 
