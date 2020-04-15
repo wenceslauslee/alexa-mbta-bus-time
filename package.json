@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "private": true,
   "dependencies": {
-    "ask-sdk-core": "^2.7.0",
-    "ask-sdk-model": "^1.23.0",
-    "aws-sdk": "^2.562.0",
+    "ask-sdk-core": "^2.8.0",
+    "ask-sdk-model": "^1.28.0",
+    "aws-sdk": "^2.656.0",
     "js-levenshtein": "^1.1.6",
     "moment": "^2.24.0",
-    "moment-timezone": "^0.5.27",
+    "moment-timezone": "^0.5.28",
     "q": "^1.5.1",
-    "request": "^2.88.0",
-    "request-promise": "^4.2.4",
-    "underscore": "^1.9.1"
+    "request": "^2.88.2",
+    "request-promise": "^4.2.5",
+    "underscore": "^1.10.2"
   },
   "devDependencies": {
     "chai": "^4.2.0",
@@ -22,7 +22,7 @@
     "eslint-plugin-node": "8.0.0",
     "eslint-plugin-promise": "4.0.1",
     "eslint-plugin-standard": "4.0.0",
-    "mocha": "^6.2.2"
+    "mocha": "^6.2.3"
   },
   "scripts": {
     "style": "eslint src test",
