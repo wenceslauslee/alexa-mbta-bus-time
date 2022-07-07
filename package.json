@@ -7,7 +7,7 @@
     "ask-sdk-model": "^1.28.0",
     "aws-sdk": "^2.814.0",
     "js-levenshtein": "^1.1.6",
-    "moment": "^2.24.0",
+    "moment": "^2.29.4",
     "moment-timezone": "^0.5.28",
     "q": "^1.5.1",
     "request": "^2.88.2",
