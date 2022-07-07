@@ -5,7 +5,7 @@
   "dependencies": {
     "ask-sdk-core": "^2.8.0",
     "ask-sdk-model": "^1.28.0",
-    "aws-sdk": "^2.656.0",
+    "aws-sdk": "^2.814.0",
     "js-levenshtein": "^1.1.6",
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.28",
